@@ -8,7 +8,6 @@ app.use(cors({
     origin: 'https://denisy2309.github.io'
 }));
 app.use(express.json());
-app.use(express.static('public')); // Statische Dateien (HTML, CSS, JS)
 
 // API-Endpunkt für Buchungen
 app.post('/api/bookings', async (req, res) => {
