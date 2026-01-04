@@ -253,7 +253,8 @@ async function submitBooking() {
     };
 
     try {
-        const response = await fetch('https://ihr-backend-api.de/bookings', {
+        // Request geht jetzt an das lokale Backend
+        const response = await fetch('http://localhost:3000/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -261,11 +262,13 @@ async function submitBooking() {
             body: JSON.stringify(bookingData)
         });
 
-        if (response.ok) {
+        const result = await response.json();
+
+        if (response.ok && result.success) {
             displayConfirmation();
             goToStep(4);
         } else {
-            alert('Fehler beim Senden der Buchung. Bitte versuchen Sie es erneut.');
+            alert('Fehler beim Senden der Buchung: ' + (result.message || 'Unbekannter Fehler'));
             submitBtn.disabled = false;
             submitBtn.textContent = 'Buchung abschließen';
         }
@@ -276,6 +279,7 @@ async function submitBooking() {
         submitBtn.textContent = 'Buchung abschließen';
     }
 }
+
 
 function displayConfirmation() {
     const confirmationDiv = document.getElementById('booking-confirmation');
