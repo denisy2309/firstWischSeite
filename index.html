@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Wisch - Buchungssystem</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app" class="min-h-screen">
+        <div class="container">
+            <!-- Header -->
+            <div class="header">
+                <h1>First Wisch - Glas und Gebäudereinigung</h1>
+                <p>Online-Buchungssystem für Reinigungsleistungen</p>
+            </div>
+
+            <!-- Fortschrittsanzeige -->
+            <div class="progress-bar">
+                <div class="progress-step" id="progress-step-1">
+                    <span class="icon">👤</span>
+                    <span>Kundendaten</span>
+                </div>
+                <div class="progress-step" id="progress-step-2">
+                    <span class="icon">📋</span>
+                    <span>Leistungen</span>
+                </div>
+                <div class="progress-step" id="progress-step-3">
+                    <span class="icon">📅</span>
+                    <span>Termin</span>
+                </div>
+            </div>
+
+            <!-- Schritt 1: Kundendaten -->
+            <div id="step-1" class="step-content">
+                <h2>Ihre Daten</h2>
+                <p class="subtitle">Diese Daten werden für zukünftige Buchungen gespeichert.</p>
+                
+                <form id="customer-form">
+                    <div class="form-group">
+                        <label for="fullName">Vollständiger Name *</label>
+                        <input type="text" id="fullName" name="fullName" placeholder="Max Mustermann" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-2">
+                            <label for="street">Straße *</label>
+                            <input type="text" id="street" name="street" placeholder="Musterstraße" required>
+                        </div>
+                        <div class="form-group form-col-1">
+                            <label for="houseNumber">Hausnr. *</label>
+                            <input type="text" id="houseNumber" name="houseNumber" placeholder="12" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group form-col-1">
+                            <label for="postalCode">PLZ *</label>
+                            <input type="text" id="postalCode" name="postalCode" placeholder="12345" required>
+                        </div>
+                        <div class="form-group form-col-2">
+                            <label for="city">Stadt *</label>
+                            <input type="text" id="city" name="city" placeholder="Musterstadt" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="healthInsurance">Krankenversicherung</label>
+                        <input type="text" id="healthInsurance" name="healthInsurance" placeholder="z.B. AOK, TK, Barmer">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="insuranceNumber">Versicherungsnummer</label>
+                        <input type="text" id="insuranceNumber" name="insuranceNumber" placeholder="12345678901">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="careLevel">Pflegestufe</label>
+                        <select id="careLevel" name="careLevel">
+                            <option value="">Bitte wählen</option>
+                            <option value="1">Pflegegrad 1</option>
+                            <option value="2">Pflegegrad 2</option>
+                            <option value="3">Pflegegrad 3</option>
+                            <option value="4">Pflegegrad 4</option>
+                            <option value="5">Pflegegrad 5</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Weiter zur Leistungsauswahl</button>
+                </form>
+            </div>
+
+            <!-- Schritt 2: Leistungsauswahl -->
+            <div id="step-2" class="step-content" style="display: none;">
+                <div class="step-header">
+                    <h2>Leistungen auswählen</h2>
+                    <button id="change-customer-btn" class="btn-link">Kundendaten ändern</button>
+                </div>
+                
+                <div id="customer-info" class="info-box"></div>
+
+                <div id="services-list" class="services-list"></div>
+
+                <button id="continue-to-date-btn" class="btn btn-primary" disabled>Weiter zur Terminauswahl</button>
+            </div>
+
+            <!-- Schritt 3: Terminauswahl -->
+            <div id="step-3" class="step-content" style="display: none;">
+                <h2>Termin wählen</h2>
+                
+                <div id="services-summary" class="info-box"></div>
+
+                <div class="form-group">
+                    <label for="appointment-date">Datum auswählen</label>
+                    <input type="date" id="appointment-date" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Uhrzeit auswählen</label>
+                    <div id="time-slots" class="time-slots"></div>
+                </div>
+
+                <div class="button-row">
+                    <button id="back-to-services-btn" class="btn btn-secondary">Zurück</button>
+                    <button id="submit-booking-btn" class="btn btn-primary" disabled>Buchung abschließen</button>
+                </div>
+            </div>
+
+            <!-- Schritt 4: Erfolgsbestätigung -->
+            <div id="step-4" class="step-content" style="display: none;">
+                <div class="success-icon">✓</div>
+                <h2>Buchung erfolgreich!</h2>
+                <p class="subtitle">Vielen Dank für Ihre Buchung. Wir haben Ihre Anfrage erhalten und werden uns in Kürze bei Ihnen melden.</p>
+                
+                <div id="booking-confirmation" class="info-box"></div>
+
+                <button id="new-booking-btn" class="btn btn-primary">Neue Buchung erstellen</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
