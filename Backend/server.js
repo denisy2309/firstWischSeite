@@ -16,7 +16,7 @@ app.post('/api/bookings', async (req, res) => {
 
     try {
         // Hier wird der Request an Ihr eigentliches Backend weitergeleitet
-        const response = await fetch('https://ihr-backend-api.de/bookings', {
+        const response = await fetch('http://localhost:5678/webhook/ad573761-a174-493e-ad63-b3a2adfb15f4', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
