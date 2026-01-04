@@ -254,7 +254,7 @@ async function submitBooking() {
 
     try {
         // Request geht jetzt an das lokale Backend
-        const response = await fetch('http://localhost:3000/api/bookings', {
+        const response = await fetch('http://localhost:3000', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
