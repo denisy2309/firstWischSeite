@@ -96,13 +96,19 @@ function goToStep(step) {
     // Alle Steps verstecken
     for (let i = 1; i <= 4; i++) {
         document.getElementById(`step-${i}`).style.display = 'none';
-        document.getElementById(`progress-step-${i}`).classList.remove('active');
+        const progressStep = document.getElementById(`progress-step-${i}`);
+        if (progressStep) {
+            progressStep.classList.remove('active');
+        }
     }
 
     // Aktuellen Step anzeigen
     document.getElementById(`step-${step}`).style.display = 'block';
     if (step <= 3) {
-        document.getElementById(`progress-step-${step}`).classList.add('active');
+        const progressStep = document.getElementById(`progress-step-${step}`);
+        if (progressStep) {
+            progressStep.classList.add('active');
+        }
     }
     currentStep = step;
 
