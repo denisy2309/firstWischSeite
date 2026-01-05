@@ -1,3 +1,5 @@
+const { format } = require("node:path");
+
 // Globale Variablen
 let currentStep = 1;
 let customerData = null;
@@ -28,6 +30,25 @@ function loadCustomerData() {
 
 function deleteCustomerData() {
     localStorage.removeItem('customer-data');
+}
+
+// Hilfsfunktion zum Formatieren des Datums
+function formatDate(dateString) {
+    const [year, month, day] = dateString.split('-');
+    return `${day}.${month}.${year}`;
+}
+
+// Hilfsfunktion für deutschen Timestamp
+function getGermanTimestamp() {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, '0');
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const year = now.getFullYear();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 }
 
 // Initialisierung
@@ -244,12 +265,21 @@ async function submitBooking() {
         };
     });
 
+    let totalPrice = 0;
+    Object.entries(selectedServices).forEach(([id, quantity]) => {
+        const service = services.find(s => s.id === id);
+        const price = quantity * service.price;
+        totalPrice += price;
+        html += `<li>${service.name} x${quantity} (${price}€)</li>`;
+    });
+
     const bookingData = {
         customer: customerData,
         services: servicesWithQuantity,
-        appointmentDate: selectedDate,
+        totalPrice: `${totalPrice}€`,
+        appointmentDate: formatDate(selectedDate),
         appointmentTime: selectedTime,
-        timestamp: new Date().toISOString()
+        timestamp: getGermanTimestamp()
     };
 
     try {
@@ -265,7 +295,7 @@ async function submitBooking() {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            displayConfirmation();
+            displayConfirmation(totalPrice);
             goToStep(4);
         } else {
             alert('Fehler beim Senden der Buchung: ' + (result.message || 'Unbekannter Fehler'));
@@ -281,22 +311,14 @@ async function submitBooking() {
 }
 
 
-function displayConfirmation() {
+function displayConfirmation(totalPrice) {
     const confirmationDiv = document.getElementById('booking-confirmation');
     let html = `
-        <strong>Termin:</strong> ${selectedDate} um ${selectedTime} Uhr<br>
+        <strong>Termin:</strong> ${formatDate(selectedDate)} um ${selectedTime} Uhr<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
         <strong>Leistungen:</strong><br>
         <ul class="booking-summary">
     `;
-
-    let totalPrice = 0;
-    Object.entries(selectedServices).forEach(([id, quantity]) => {
-        const service = services.find(s => s.id === id);
-        const price = quantity * service.price;
-        totalPrice += price;
-        html += `<li>${service.name} x${quantity} (${price}€)</li>`;
-    });
 
     html += `</ul><div class="total-section"><strong>Gesamtpreis: ${totalPrice}€</strong></div>`;
     confirmationDiv.innerHTML = html;
