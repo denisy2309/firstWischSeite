@@ -249,7 +249,7 @@ async function submitBooking() {
         services: servicesWithQuantity,
         appointmentDate: selectedDate.format('DD.MM.YYYY'),
         appointmentTime: selectedTime,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString().format('DD.MM.YYYY HH:mm:ss')
     };
 
     try {
