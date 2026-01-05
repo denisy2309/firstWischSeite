@@ -91,6 +91,7 @@ function handleCustomerFormSubmit(e) {
         houseNumber: formData.get('houseNumber'),
         postalCode: formData.get('postalCode'),
         city: formData.get('city'),
+        phone: formData.get('phone'),
         healthInsurance: formData.get('healthInsurance'),
         insuranceNumber: formData.get('insuranceNumber'),
         careLevel: formData.get('careLevel')
@@ -144,7 +145,8 @@ function displayCustomerInfo() {
     const infoBox = document.getElementById('customer-info');
     infoBox.innerHTML = `
         <strong>Kunde:</strong> ${customerData.fullName}<br>
-        <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}
+        <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
+        <strong>Telefon:</strong> ${customerData.phone}
     `;
 }
 
