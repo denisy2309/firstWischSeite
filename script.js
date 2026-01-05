@@ -254,7 +254,7 @@ async function submitBooking() {
 
     try {
         // Request geht jetzt an das lokale Backend
-        const response = await fetch('http://localhost:3000/api/bookings', {
+        const response = await fetch('https://uncastigated-niels-greatly.ngrok-free.dev/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
