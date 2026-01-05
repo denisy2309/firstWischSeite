@@ -1,5 +1,3 @@
-const { format } = require("node:path");
-
 // Globale Variablen
 let currentStep = 1;
 let customerData = null;
