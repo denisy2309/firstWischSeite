@@ -284,7 +284,7 @@ async function submitBooking() {
 function displayConfirmation() {
     const confirmationDiv = document.getElementById('booking-confirmation');
     let html = `
-        <strong>Termin:</strong> ${selectedDate} um ${selectedTime} Uhr<br>
+        <strong>Termin:</strong> ${selectedDate.format('DD.MM.YYYY')} um ${selectedTime} Uhr<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
         <strong>Leistungen:</strong><br>
         <ul class="booking-summary">
