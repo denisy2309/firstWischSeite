@@ -65,11 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('back-to-services-btn').addEventListener('click', () => goToStep(2));
     document.getElementById('submit-booking-btn').addEventListener('click', submitBooking);
     document.getElementById('new-booking-btn').addEventListener('click', () => {
-        selectedServices = {};
-        selectedDate = '';
-        selectedTime = '';
+        resetBooking();
         goToStep(2);
-    });
+});
 
     // Datum Minimum setzen
     const today = new Date().toISOString().split('T')[0];
@@ -100,6 +98,26 @@ function handleCustomerFormSubmit(e) {
     saveCustomerData(data);
     customerData = data;
     goToStep(2);
+}
+
+function resetBooking() {
+    // Buchungsdaten zurücksetzen
+    selectedServices = {};
+    selectedDate = '';
+    selectedTime = '';
+    
+    // Formularfelder zurücksetzen
+    document.getElementById('appointment-date').value = '';
+    
+    // Alle Zeitslots deselektieren
+    document.querySelectorAll('.time-slot').forEach(slot => {
+        slot.classList.remove('selected');
+    });
+    
+    // Submit-Button zurücksetzen
+    const submitBtn = document.getElementById('submit-booking-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Buchung abschließen';
 }
 
 function resetCustomerData() {
