@@ -247,7 +247,7 @@ async function submitBooking() {
     const bookingData = {
         customer: customerData,
         services: servicesWithQuantity,
-        appointmentDate: selectedDate,
+        appointmentDate: selectedDate.format('DD.MM.YYYY'),
         appointmentTime: selectedTime,
         timestamp: new Date().toISOString()
     };
