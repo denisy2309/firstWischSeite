@@ -264,13 +264,10 @@ async function submitBooking() {
     });
 
     let totalPrice = 0;
-    Object.entries(selectedServices).forEach(([id, quantity]) => {
-        const service = services.find(s => s.id === id);
-        const price = quantity * service.price;
-        totalPrice += price;
-        html += `<li>${service.name} x${quantity} (${price}€)</li>`;
+    servicesWithQuantity.forEach(s => {
+        totalPrice += parseInt(s.totalPrice);
     });
-
+    
     const bookingData = {
         customer: customerData,
         services: servicesWithQuantity,
@@ -317,6 +314,12 @@ function displayConfirmation(totalPrice) {
         <strong>Leistungen:</strong><br>
         <ul class="booking-summary">
     `;
+
+    Object.entries(selectedServices).forEach(([id, quantity]) => {
+        const service = services.find(s => s.id === id);
+        const price = quantity * service.price;
+        html += `<li>${service.name} x${quantity} (${price}€)</li>`;
+    });
 
     html += `</ul><div class="total-section"><strong>Gesamtpreis: ${totalPrice}€</strong></div>`;
     confirmationDiv.innerHTML = html;
