@@ -60,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event Listeners
     document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
-    document.getElementById('change-customer-btn').addEventListener('click', resetCustomerData);
+    document.getElementById('change-customer-btn').addEventListener('click', () => goToStep(1));
     document.getElementById('continue-to-date-btn').addEventListener('click', () => goToStep(3));
     document.getElementById('back-to-services-btn').addEventListener('click', () => goToStep(2));
     document.getElementById('submit-booking-btn').addEventListener('click', submitBooking);
@@ -112,6 +112,20 @@ function resetCustomerData() {
     goToStep(1);
 }
 
+function fillCustomerForm() {
+    if (customerData) {
+        document.getElementById('fullName').value = customerData.fullName || '';
+        document.getElementById('street').value = customerData.street || '';
+        document.getElementById('houseNumber').value = customerData.houseNumber || '';
+        document.getElementById('postalCode').value = customerData.postalCode || '';
+        document.getElementById('city').value = customerData.city || '';
+        document.getElementById('phone').value = customerData.phone || '';
+        document.getElementById('healthInsurance').value = customerData.healthInsurance || '';
+        document.getElementById('insuranceNumber').value = customerData.insuranceNumber || '';
+        document.getElementById('careLevel').value = customerData.careLevel || '';
+    }
+}
+
 function goToStep(step) {
     // Alle Steps verstecken
     for (let i = 1; i <= 4; i++) {
@@ -133,7 +147,9 @@ function goToStep(step) {
     currentStep = step;
 
     // Step-spezifische Aktionen
-    if (step === 2) {
+    if (step === 1) {
+        fillCustomerForm();
+    } else if (step === 2) {
         displayCustomerInfo();
         renderServices();
     } else if (step === 3) {
