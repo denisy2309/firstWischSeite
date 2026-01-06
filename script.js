@@ -358,16 +358,16 @@ async function fetchAvailableSlots() {
             body: JSON.stringify(requestData)
         });
         
-        const result = await response.json().output;
-        console.log('Antwort-Status: ', response);
-        console.log('Antwort-Daten: ', result.success);
-        
-        if (response.ok && result.success) {
+        const result = await response.json();
+        console.log('Antwort-Status: ', response.ok);
+        console.log('Antwort-Daten: ', result.output.success);
+
+        if (response.ok && result.output.success) {
             availableSlots = {};
             
             // Slots in unser Format umwandeln
-            if (result.availableSlots && Array.isArray(result.availableSlots)) {
-                result.availableSlots.forEach(slot => {
+            if (result.output.availableSlots && Array.isArray(result.output.availableSlots)) {
+                result.output.availableSlots.forEach(slot => {
                     availableSlots[slot.date] = slot.times;
                 });
             }
