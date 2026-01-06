@@ -358,7 +358,9 @@ async function fetchAvailableSlots() {
             body: JSON.stringify(requestData)
         });
         
-        const result = await response.json();
+        const result = await response.json().output;
+        console.log('Antwort-Status: ', response);
+        console.log('Antwort-Daten: ', result.success);
         
         if (response.ok && result.success) {
             availableSlots = {};
