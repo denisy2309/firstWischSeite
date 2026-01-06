@@ -333,9 +333,8 @@ async function fetchAvailableSlots() {
     
     const totalDuration = calculateTotalDurationForBackend();
     
-    // Zeitraum berechnen (morgen + 30 Tage)
-    const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate() + 1);
+    // Zeitraum berechnen (heute + 30 Tage)
+    const today = new Date();
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30);
     
@@ -343,7 +342,7 @@ async function fetchAvailableSlots() {
         contractor: contractorInfo.contractor,
         requiredDuration: totalDuration,
         searchPeriod: {
-            startDate: tomorrow.toISOString().split('T')[0],
+            startDate: today.toISOString().split('T')[0],
             endDate: endDate.toISOString().split('T')[0]
         },
         workingHours: {
@@ -375,7 +374,13 @@ async function fetchAvailableSlots() {
                     availableSlots[slot.date] = slot.times;
                 });
             }
-            
+
+            availableSlots[today].forEach(time => {
+                if(time < new Date().getTime().slice(0,5) + 2) {
+                    availableSlots[today].remove(time);
+                }
+            });
+
             // WICHTIG: Erst Loading beenden, DANN Kalender rendern
             hideLoadingState();
             renderDynamicCalendar();
