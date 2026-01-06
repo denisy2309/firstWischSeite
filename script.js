@@ -17,7 +17,6 @@ const services = [
 
 // Konstanten für Zeitberechnung
 const TRAVEL_TIME = 30; // Minuten
-const BUFFER_TIME = 15; // Minuten
 
 // PLZ zu Bundesland Mapping (NRW und Niedersachsen)
 const postalCodeMapping = {
@@ -92,8 +91,8 @@ function getContractorFromPostalCode(postalCode) {
     return null;
 }
 
-// Gesamtdauer berechnen
-function calculateTotalDuration() {
+// Gesamtdauer berechnen (NUR Leistungen für Frontend-Anzeige)
+function calculateServiceDuration() {
     let serviceDuration = 0;
     
     Object.entries(selectedServices).forEach(([id, quantity]) => {
@@ -101,7 +100,12 @@ function calculateTotalDuration() {
         serviceDuration += service.duration * quantity;
     });
     
-    return serviceDuration + TRAVEL_TIME + BUFFER_TIME;
+    return serviceDuration;
+}
+
+// Gesamtdauer inkl. Anfahrt für Backend berechnen
+function calculateTotalDurationForBackend() {
+    return calculateServiceDuration() + TRAVEL_TIME;
 }
 
 
@@ -294,7 +298,7 @@ function updateContinueButton() {
 
 function displayServicesSummary() {
     const summaryDiv = document.getElementById('services-summary');
-    const totalDuration = calculateTotalDuration();
+    const serviceDuration = calculateServiceDuration();
     let html = '<strong>Ausgewählte Leistungen:</strong><br><ul class="booking-summary">';
     let totalPrice = 0;
 
@@ -308,8 +312,7 @@ function displayServicesSummary() {
 
     html += `</ul><div class="total-section">`;
     html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
-    html += `<strong>Geschätzte Dauer: ${totalDuration} Minuten (${Math.round(totalDuration/60*10)/10} Std)</strong>`;
-    html += `<br><small style="color: #6b7280;">inkl. ${TRAVEL_TIME} Min Fahrtzeit + ${BUFFER_TIME} Min Puffer</small>`;
+    html += `<strong>Geschätzte Dauer: ${serviceDuration} Minuten (ca. ${Math.round(serviceDuration/60*10)/10} Std)</strong>`;
     html += `</div>`;
     summaryDiv.innerHTML = html;
 }
@@ -328,7 +331,7 @@ async function fetchAvailableSlots() {
         return;
     }
     
-    const totalDuration = calculateTotalDuration();
+    const totalDuration = calculateTotalDurationForBackend();
     
     // Zeitraum berechnen (heute + 30 Tage)
     const today = new Date();
@@ -510,7 +513,7 @@ async function submitBooking() {
     submitBtn.textContent = 'Wird gesendet...';
 
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
-    const totalDuration = calculateTotalDuration();
+    const totalDurationForBackend = calculateTotalDurationForBackend();
 
     const servicesWithQuantity = Object.entries(selectedServices).map(([id, quantity]) => {
         const service = services.find(s => s.id === id);
@@ -535,7 +538,7 @@ async function submitBooking() {
         contractor: contractorInfo.contractor,
         services: servicesWithQuantity,
         totalPrice: `${totalPrice}€`,
-        totalDuration: totalDuration,
+        totalDuration: totalDurationForBackend,
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
         timestamp: getGermanTimestamp()
@@ -572,7 +575,7 @@ async function submitBooking() {
 
 function displayConfirmation(totalPrice) {
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
-    const totalDuration = calculateTotalDuration();
+    const serviceDuration = calculateServiceDuration();
     
     const confirmationDiv = document.getElementById('booking-confirmation');
     let html = `
@@ -591,7 +594,7 @@ function displayConfirmation(totalPrice) {
 
     html += `</ul><div class="total-section">`;
     html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
-    html += `<strong>Dauer: ca. ${totalDuration} Minuten</strong>`;
+    html += `<strong>Dauer: ca. ${serviceDuration} Minuten</strong>`;
     html += `</div>`;
     confirmationDiv.innerHTML = html;
 }
