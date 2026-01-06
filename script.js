@@ -333,8 +333,9 @@ async function fetchAvailableSlots() {
     
     const totalDuration = calculateTotalDurationForBackend();
     
-    // Zeitraum berechnen (heute + 30 Tage)
-    const today = new Date();
+    // Zeitraum berechnen (morgen + 30 Tage)
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
     const endDate = new Date();
     endDate.setDate(endDate.getDate() + 30);
     
@@ -342,7 +343,7 @@ async function fetchAvailableSlots() {
         contractor: contractorInfo.contractor,
         requiredDuration: totalDuration,
         searchPeriod: {
-            startDate: today.toISOString().split('T')[0],
+            startDate: tomorrow.toISOString().split('T')[0],
             endDate: endDate.toISOString().split('T')[0]
         },
         workingHours: {
