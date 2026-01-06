@@ -362,7 +362,7 @@ async function fetchAvailableSlots() {
     };
     
     try {
-        const response = await fetch('http://localhost:5678/webhook/ad573761-a174-493e-ad63-b3a2adfb15f4', {
+        const response = await fetch('http://localhost:5678/webhook/92a503ef-6e40-4af1-8620-1f7c89052b07', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
