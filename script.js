@@ -428,6 +428,7 @@ function hideLoadingState() {
 // Dynamischen Kalender rendern
 function renderDynamicCalendar() {
     const dateSelect = document.getElementById('appointment-date');
+    dateSelect.innerHTML = '<option value="">Bitte wählen Sie ein Datum</option>';
     
     if (Object.keys(availableSlots).length === 0) {
         dateSelect.innerHTML = '<option value="">Keine Termine verfügbar</option>';
