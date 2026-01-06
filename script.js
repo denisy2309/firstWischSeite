@@ -375,7 +375,7 @@ async function fetchAvailableSlots() {
                 });
             }
 
-            console.log('Verfügbare Slots:', availableSlots);
+            console.log('Verfügbare Slots:', availableSlots[today]);
             availableSlots[today].forEach(time => {
                 if(time < new Date().getTime().slice(0,5) + 2) {
                     availableSlots[today].remove(time);
