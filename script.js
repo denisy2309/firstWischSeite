@@ -4,17 +4,42 @@ let customerData = null;
 let selectedServices = {};
 let selectedDate = '';
 let selectedTime = '';
+let availableSlots = {}; // Format: { "2026-01-08": ["07:00", "09:00"], ... }
+let isLoadingSlots = false;
 
-// Services-Daten
+// Services-Daten mit Zeitangaben
 const services = [
-    { id: 'windows', name: 'Fenster putzen', price: 45 },
-    { id: 'floors', name: 'Boden reinigen', price: 35 },
-    { id: 'bathroom', name: 'Badezimmer reinigen', price: 40 },
-    { id: 'kitchen', name: 'Küche reinigen', price: 40 }
+    { id: 'windows', name: 'Fenster putzen', price: 45, duration: 40 },
+    { id: 'floors', name: 'Böden reinigen', price: 35, duration: 30 },
+    { id: 'bathroom', name: 'Badezimmer reinigen', price: 40, duration: 25 },
+    { id: 'kitchen', name: 'Küche reinigen', price: 40, duration: 25 }
 ];
 
-// Zeitslots
-const timeSlots = ['08:00', '10:00', '12:00', '14:00', '16:00'];
+// Konstanten für Zeitberechnung
+const TRAVEL_TIME = 30; // Minuten
+const BUFFER_TIME = 15; // Minuten
+
+// PLZ zu Bundesland Mapping (NRW und Niedersachsen)
+const postalCodeMapping = {
+    'Nordrhein-Westfalen': {
+        ranges: [
+            { start: 40000, end: 48999 },
+            { start: 50000, end: 53999 },
+            { start: 57000, end: 59999 }
+        ],
+        contractor: 'Subunternehmer NRW'
+    },
+    'Niedersachsen': {
+        ranges: [
+            { start: 26000, end: 27999 },
+            { start: 28000, end: 29999 },
+            { start: 30000, end: 31999 },
+            { start: 37000, end: 38999 },
+            { start: 49000, end: 49999 }
+        ],
+        contractor: 'Subunternehmer Niedersachsen'
+    }
+};
 
 // LocalStorage Funktionen
 function saveCustomerData(data) {
@@ -49,8 +74,48 @@ function getGermanTimestamp() {
     return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 }
 
+// PLZ zu Bundesland und Subunternehmer zuordnen
+function getContractorFromPostalCode(postalCode) {
+    const plz = parseInt(postalCode);
+    
+    for (const [state, data] of Object.entries(postalCodeMapping)) {
+        for (const range of data.ranges) {
+            if (plz >= range.start && plz <= range.end) {
+                return {
+                    state: state,
+                    contractor: data.contractor
+                };
+            }
+        }
+    }
+    
+    return null;
+}
+
+// Gesamtdauer berechnen
+function calculateTotalDuration() {
+    let serviceDuration = 0;
+    
+    Object.entries(selectedServices).forEach(([id, quantity]) => {
+        const service = services.find(s => s.id === id);
+        serviceDuration += service.duration * quantity;
+    });
+    
+    return serviceDuration + TRAVEL_TIME + BUFFER_TIME;
+}
+
+
 // Initialisierung
 document.addEventListener('DOMContentLoaded', function() {
+    // CSS für Spinner hinzufügen
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
     // Prüfen ob Kundendaten existieren
     const storedData = loadCustomerData();
     if (storedData) {
@@ -61,22 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event Listeners
     document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
     document.getElementById('change-customer-btn').addEventListener('click', () => goToStep(1));
-    document.getElementById('continue-to-date-btn').addEventListener('click', () => goToStep(3));
+    document.getElementById('continue-to-date-btn').addEventListener('click', async () => {
+        await fetchAvailableSlots();
+        goToStep(3);
+    });
     document.getElementById('back-to-services-btn').addEventListener('click', () => goToStep(2));
     document.getElementById('submit-booking-btn').addEventListener('click', submitBooking);
     document.getElementById('new-booking-btn').addEventListener('click', () => {
         resetBooking();
         goToStep(2);
-});
-
-    // Datum Minimum setzen
-    const today = new Date().toISOString().split('T')[0];
-    document.getElementById('appointment-date').min = today;
-    document.getElementById('appointment-date').addEventListener('change', updateSubmitButton);
+    });
 
     // Services rendern
     renderServices();
-    renderTimeSlots();
 });
 
 function handleCustomerFormSubmit(e) {
@@ -95,26 +157,24 @@ function handleCustomerFormSubmit(e) {
         careLevel: formData.get('careLevel')
     };
 
+    // Prüfen ob PLZ unterstützt wird
+    const contractorInfo = getContractorFromPostalCode(data.postalCode);
+    if (!contractorInfo) {
+        alert('Entschuldigung, für Ihre Postleitzahl (NRW und Niedersachsen) bieten wir derzeit keinen Service an. Bitte überprüfen Sie Ihre Eingabe.');
+        return;
+    }
+
     saveCustomerData(data);
     customerData = data;
     goToStep(2);
 }
 
 function resetBooking() {
-    // Buchungsdaten zurücksetzen
     selectedServices = {};
     selectedDate = '';
     selectedTime = '';
+    availableSlots = {};
     
-    // Formularfelder zurücksetzen
-    document.getElementById('appointment-date').value = '';
-    
-    // Alle Zeitslots deselektieren
-    document.querySelectorAll('.time-slot').forEach(slot => {
-        slot.classList.remove('selected');
-    });
-    
-    // Submit-Button zurücksetzen
     const submitBtn = document.getElementById('submit-booking-btn');
     submitBtn.disabled = true;
     submitBtn.textContent = 'Buchung abschließen';
@@ -197,7 +257,7 @@ function renderServices() {
         serviceDiv.innerHTML = `
             <div class="service-header">
                 <span class="service-name">${service.name}</span>
-                <span class="service-price">${service.price}€ / Einheit</span>
+                <span class="service-price">${service.price}€ / Einheit (${service.duration} Min)</span>
             </div>
             <div class="service-controls">
                 <div class="quantity-controls">
@@ -234,25 +294,181 @@ function updateContinueButton() {
 
 function displayServicesSummary() {
     const summaryDiv = document.getElementById('services-summary');
+    const totalDuration = calculateTotalDuration();
     let html = '<strong>Ausgewählte Leistungen:</strong><br><ul class="booking-summary">';
     let totalPrice = 0;
 
     Object.entries(selectedServices).forEach(([id, quantity]) => {
         const service = services.find(s => s.id === id);
         const price = quantity * service.price;
+        const duration = quantity * service.duration;
         totalPrice += price;
-        html += `<li>${service.name} x${quantity} (${price}€)</li>`;
+        html += `<li>${service.name} x${quantity} (${price}€, ${duration} Min)</li>`;
     });
 
-    html += `</ul><div class="total-section"><strong>Gesamtpreis: ${totalPrice}€</strong></div>`;
+    html += `</ul><div class="total-section">`;
+    html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
+    html += `<strong>Geschätzte Dauer: ${totalDuration} Minuten (${Math.round(totalDuration/60*10)/10} Std)</strong>`;
+    html += `<br><small style="color: #6b7280;">inkl. ${TRAVEL_TIME} Min Fahrtzeit + ${BUFFER_TIME} Min Puffer</small>`;
+    html += `</div>`;
     summaryDiv.innerHTML = html;
 }
 
-function renderTimeSlots() {
+// Verfügbare Slots von n8n abrufen
+async function fetchAvailableSlots() {
+    isLoadingSlots = true;
+    showLoadingState();
+    
+    const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
+    
+    if (!contractorInfo) {
+        alert('Entschuldigung, für Ihre Postleitzahl bieten wir derzeit keinen Service an.');
+        isLoadingSlots = false;
+        return;
+    }
+    
+    const totalDuration = calculateTotalDuration();
+    
+    // Zeitraum berechnen (heute + 30 Tage)
+    const today = new Date();
+    const endDate = new Date();
+    endDate.setDate(endDate.getDate() + 30);
+    
+    const requestData = {
+        customer: {
+            name: customerData.fullName,
+            postalCode: customerData.postalCode,
+            state: contractorInfo.state,
+            phone: customerData.phone
+        },
+        services: Object.entries(selectedServices).map(([id, quantity]) => {
+            const service = services.find(s => s.id === id);
+            return {
+                name: service.name,
+                quantity: quantity,
+                durationPerUnit: service.duration
+            };
+        }),
+        totalDuration: totalDuration,
+        contractor: contractorInfo.contractor,
+        searchPeriod: {
+            startDate: today.toISOString().split('T')[0],
+            endDate: endDate.toISOString().split('T')[0]
+        },
+        workingHours: {
+            start: '07:00',
+            end: '18:00'
+        }
+    };
+    
+    try {
+        const response = await fetch('http://localhost:5678/webhook/ad573761-a174-493e-ad63-b3a2adfb15f4', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            availableSlots = {};
+            
+            // Slots in unser Format umwandeln
+            if (result.availableSlots && Array.isArray(result.availableSlots)) {
+                result.availableSlots.forEach(slot => {
+                    availableSlots[slot.date] = slot.times;
+                });
+            }
+            
+            renderDynamicCalendar();
+        } else {
+            alert('Fehler beim Laden der verfügbaren Termine. Bitte versuchen Sie es erneut.');
+        }
+    } catch (error) {
+        console.error('Fehler beim Abrufen der Termine:', error);
+        alert('Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
+    } finally {
+        isLoadingSlots = false;
+        hideLoadingState();
+    }
+}
+
+// Loading-State anzeigen
+function showLoadingState() {
+    const dateGroup = document.querySelector('.form-group:has(#appointment-date)');
+    const timeGroup = document.querySelector('.form-group:has(#time-slots)');
+    
+    dateGroup.innerHTML = `
+        <label>Verfügbare Termine werden geladen...</label>
+        <div style="padding: 2rem; text-align: center;">
+            <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <p style="margin-top: 1rem; color: #6b7280;">Bitte warten Sie 7-10 Sekunden...</p>
+        </div>
+    `;
+    timeGroup.style.display = 'none';
+}
+
+// Loading-State verstecken
+function hideLoadingState() {
+    const dateGroup = document.querySelector('.form-group:has(#appointment-date)').parentElement;
+    dateGroup.querySelector('.form-group').innerHTML = `
+        <label for="appointment-date">Datum auswählen</label>
+        <select id="appointment-date" required>
+            <option value="">Bitte wählen Sie ein Datum</option>
+        </select>
+    `;
+    document.querySelector('.form-group:has(#time-slots)').style.display = 'block';
+}
+
+// Dynamischen Kalender rendern
+function renderDynamicCalendar() {
+    const dateSelect = document.getElementById('appointment-date');
+    dateSelect.innerHTML = '<option value="">Bitte wählen Sie ein Datum</option>';
+    
+    if (Object.keys(availableSlots).length === 0) {
+        dateSelect.innerHTML = '<option value="">Keine Termine verfügbar</option>';
+        document.getElementById('time-slots').innerHTML = '<p style="color: #6b7280;">Bitte kontaktieren Sie uns telefonisch für alternative Termine.</p>';
+        return;
+    }
+    
+    // Sortierte Datums-Liste
+    const sortedDates = Object.keys(availableSlots).sort();
+    
+    sortedDates.forEach(date => {
+        const option = document.createElement('option');
+        option.value = date;
+        option.textContent = formatDate(date);
+        dateSelect.appendChild(option);
+    });
+    
+    // Event Listener für Datumsauswahl
+    dateSelect.addEventListener('change', (e) => {
+        selectedDate = e.target.value;
+        selectedTime = '';
+        renderTimeSlots(selectedDate);
+        updateSubmitButton();
+    });
+}
+
+// Zeitslots für ausgewähltes Datum rendern
+function renderTimeSlots(date) {
     const timeSlotsDiv = document.getElementById('time-slots');
     timeSlotsDiv.innerHTML = '';
-
-    timeSlots.forEach(time => {
+    
+    if (!date || !availableSlots[date]) {
+        return;
+    }
+    
+    const times = availableSlots[date];
+    
+    if (times.length === 0) {
+        timeSlotsDiv.innerHTML = '<p style="color: #6b7280;">Keine Zeiten verfügbar für dieses Datum.</p>';
+        return;
+    }
+    
+    times.forEach(time => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'time-slot';
@@ -277,7 +493,6 @@ function selectTimeSlot(time) {
 }
 
 function updateSubmitButton() {
-    selectedDate = document.getElementById('appointment-date').value;
     const canSubmit = selectedDate && selectedTime;
     document.getElementById('submit-booking-btn').disabled = !canSubmit;
 }
@@ -287,6 +502,9 @@ async function submitBooking() {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gesendet...';
 
+    const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
+    const totalDuration = calculateTotalDuration();
+
     const servicesWithQuantity = Object.entries(selectedServices).map(([id, quantity]) => {
         const service = services.find(s => s.id === id);
         const totalPrice = quantity * service.price;
@@ -295,7 +513,8 @@ async function submitBooking() {
             name: service.name,
             quantity: quantity,
             pricePerUnit: `${service.price}€`,
-            totalPrice: `${totalPrice}€`
+            totalPrice: `${totalPrice}€`,
+            duration: service.duration * quantity
         };
     });
 
@@ -303,19 +522,20 @@ async function submitBooking() {
     servicesWithQuantity.forEach(s => {
         totalPrice += parseInt(s.totalPrice);
     });
-    
+
     const bookingData = {
         customer: customerData,
+        contractor: contractorInfo.contractor,
         services: servicesWithQuantity,
         totalPrice: `${totalPrice}€`,
-        appointmentDate: formatDate(selectedDate),
+        totalDuration: totalDuration,
+        appointmentDate: selectedDate,
         appointmentTime: selectedTime,
         timestamp: getGermanTimestamp()
     };
 
     try {
-        // Request geht jetzt an das lokale Backend
-        const response = await fetch('https://uncastigated-niels-greatly.ngrok-free.dev/api/bookings', {
+        const response = await fetch('http://localhost:3000/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -328,6 +548,7 @@ async function submitBooking() {
         if (response.ok && result.success) {
             displayConfirmation(totalPrice);
             goToStep(4);
+            submitBtn.textContent = 'Buchung abschließen';
         } else {
             alert('Fehler beim Senden der Buchung: ' + (result.message || 'Unbekannter Fehler'));
             submitBtn.disabled = false;
@@ -343,10 +564,14 @@ async function submitBooking() {
 
 
 function displayConfirmation(totalPrice) {
+    const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
+    const totalDuration = calculateTotalDuration();
+    
     const confirmationDiv = document.getElementById('booking-confirmation');
     let html = `
         <strong>Termin:</strong> ${formatDate(selectedDate)} um ${selectedTime} Uhr<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
+        <strong>Zuständig:</strong> ${contractorInfo.contractor}<br>
         <strong>Leistungen:</strong><br>
         <ul class="booking-summary">
     `;
@@ -357,6 +582,9 @@ function displayConfirmation(totalPrice) {
         html += `<li>${service.name} x${quantity} (${price}€)</li>`;
     });
 
-    html += `</ul><div class="total-section"><strong>Gesamtpreis: ${totalPrice}€</strong></div>`;
+    html += `</ul><div class="total-section">`;
+    html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
+    html += `<strong>Dauer: ca. ${totalDuration} Minuten</strong>`;
+    html += `</div>`;
     confirmationDiv.innerHTML = html;
 }
