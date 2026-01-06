@@ -324,6 +324,7 @@ async function fetchAvailableSlots() {
     if (!contractorInfo) {
         alert('Entschuldigung, für Ihre Postleitzahl bieten wir derzeit keinen Service an.');
         isLoadingSlots = false;
+        hideLoadingState();
         return;
     }
     
@@ -358,29 +359,30 @@ async function fetchAvailableSlots() {
         });
         
         const result = await response.json();
-        console.log('Antwort-Status: ', response.ok);
-        console.log('Antwort-Daten: ', result.output.success);
-
-        if (response.ok && result.output.success) {
+        
+        if (response.ok && result.success) {
             availableSlots = {};
             
             // Slots in unser Format umwandeln
-            if (result.output.availableSlots && Array.isArray(result.output.availableSlots)) {
-                result.output.availableSlots.forEach(slot => {
+            if (result.availableSlots && Array.isArray(result.availableSlots)) {
+                result.availableSlots.forEach(slot => {
                     availableSlots[slot.date] = slot.times;
                 });
             }
             
+            // WICHTIG: Erst Loading beenden, DANN Kalender rendern
+            hideLoadingState();
             renderDynamicCalendar();
         } else {
+            hideLoadingState();
             alert('Fehler beim Laden der verfügbaren Termine. Bitte versuchen Sie es erneut.');
         }
     } catch (error) {
         console.error('Fehler beim Abrufen der Termine:', error);
+        hideLoadingState();
         alert('Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
     } finally {
         isLoadingSlots = false;
-        hideLoadingState();
     }
 }
 
