@@ -314,7 +314,7 @@ function displayServicesSummary() {
     summaryDiv.innerHTML = html;
 }
 
-// Verfügbare Slots von n8n abrufen
+// Verfügbare Slots vom Backend abrufen
 async function fetchAvailableSlots() {
     isLoadingSlots = true;
     showLoadingState();
@@ -335,8 +335,8 @@ async function fetchAvailableSlots() {
     endDate.setDate(endDate.getDate() + 30);
     
     const requestData = {
-        totalDuration: totalDuration,
         contractor: contractorInfo.contractor,
+        requiredDuration: totalDuration,
         searchPeriod: {
             startDate: today.toISOString().split('T')[0],
             endDate: endDate.toISOString().split('T')[0]
@@ -348,7 +348,8 @@ async function fetchAvailableSlots() {
     };
     
     try {
-        const response = await fetch('http://localhost:5678/webhook/92a503ef-6e40-4af1-8620-1f7c89052b07', {
+        // Request geht an unser Backend
+        const response = await fetch('https://uncastigated-niels-greatly.ngrok-free.dev/api/available-slots', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -521,7 +522,7 @@ async function submitBooking() {
     };
 
     try {
-        const response = await fetch('http://localhost:3000/api/bookings', {
+        const response = await fetch('https://uncastigated-niels-greatly.ngrok-free.dev/api/bookings', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
