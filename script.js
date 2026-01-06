@@ -375,12 +375,27 @@ async function fetchAvailableSlots() {
                 });
             }
 
-            console.log('Verfügbare Slots:', availableSlots.get(today));
-            availableSlots[today].forEach(time => {
-                if(time < new Date().getTime().slice(0,5) + 2) {
-                    availableSlots[today].remove(time);
+            // NEU: Heutige Slots filtern (nur Zeiten mindestens 2 Stunden in Zukunft)
+            const today = new Date().toISOString().split('T')[0];
+            if (availableSlots[today]) {
+                const now = new Date();
+                const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 Stunden
+                const minHours = minTime.getHours();
+                const minMinutes = minTime.getMinutes();
+                
+                availableSlots[today] = availableSlots[today].filter(time => {
+                    const [hours, minutes] = time.split(':').map(Number);
+                    const timeInMinutes = hours * 60 + minutes;
+                    const minTimeInMinutes = minHours * 60 + minMinutes;
+                    
+                    return timeInMinutes >= minTimeInMinutes;
+                });
+                
+                // Wenn keine Zeiten mehr übrig sind, entferne den heutigen Tag komplett
+                if (availableSlots[today].length === 0) {
+                    delete availableSlots[today];
                 }
-            });
+            }
 
             // WICHTIG: Erst Loading beenden, DANN Kalender rendern
             hideLoadingState();
