@@ -335,20 +335,6 @@ async function fetchAvailableSlots() {
     endDate.setDate(endDate.getDate() + 30);
     
     const requestData = {
-        customer: {
-            name: customerData.fullName,
-            postalCode: customerData.postalCode,
-            state: contractorInfo.state,
-            phone: customerData.phone
-        },
-        services: Object.entries(selectedServices).map(([id, quantity]) => {
-            const service = services.find(s => s.id === id);
-            return {
-                name: service.name,
-                quantity: quantity,
-                durationPerUnit: service.duration
-            };
-        }),
         totalDuration: totalDuration,
         contractor: contractorInfo.contractor,
         searchPeriod: {
