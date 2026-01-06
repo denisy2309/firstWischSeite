@@ -312,7 +312,7 @@ function displayServicesSummary() {
 
     html += `</ul><div class="total-section">`;
     html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
-    html += `<strong>Geschätzte Dauer: ${serviceDuration} Minuten (ca. ${Math.round(serviceDuration/60*10)/10} Std)</strong>`;
+    html += `<strong>Geschätzte Dauer: ${serviceDuration} Minuten</strong>`;
     html += `</div>`;
     summaryDiv.innerHTML = html;
 }
