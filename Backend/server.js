@@ -32,6 +32,7 @@ app.post('/api/available-slots', async (req, res) => {
         });
 
         const responseData = await response.json();
+        console.log(responseData);
 
         if (response.ok) {
             res.status(200).json(responseData);
