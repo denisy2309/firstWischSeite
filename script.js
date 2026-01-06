@@ -384,29 +384,43 @@ async function fetchAvailableSlots() {
 
 // Loading-State anzeigen
 function showLoadingState() {
-    const dateGroup = document.querySelector('.form-group:has(#appointment-date)');
-    const timeGroup = document.querySelector('.form-group:has(#time-slots)');
+    const step3 = document.getElementById('step-3');
+    const dateContainer = step3.querySelector('#appointment-date')?.closest('.form-group');
+    const timeContainer = step3.querySelector('#time-slots')?.closest('.form-group');
     
-    dateGroup.innerHTML = `
-        <label>Verfügbare Termine werden geladen...</label>
-        <div style="padding: 2rem; text-align: center;">
-            <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            <p style="margin-top: 1rem; color: #6b7280;">Bitte warten Sie 7-10 Sekunden...</p>
-        </div>
-    `;
-    timeGroup.style.display = 'none';
+    if (dateContainer) {
+        dateContainer.innerHTML = `
+            <label>Verfügbare Termine werden geladen...</label>
+            <div style="padding: 2rem; text-align: center;">
+                <div style="display: inline-block; width: 40px; height: 40px; border: 4px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <p style="margin-top: 1rem; color: #6b7280;">Bitte warten Sie 7-10 Sekunden...</p>
+            </div>
+        `;
+    }
+    
+    if (timeContainer) {
+        timeContainer.style.display = 'none';
+    }
 }
 
 // Loading-State verstecken
 function hideLoadingState() {
-    const dateGroup = document.querySelector('.form-group:has(#appointment-date)').parentElement;
-    dateGroup.querySelector('.form-group').innerHTML = `
-        <label for="appointment-date">Datum auswählen</label>
-        <select id="appointment-date" required>
-            <option value="">Bitte wählen Sie ein Datum</option>
-        </select>
-    `;
-    document.querySelector('.form-group:has(#time-slots)').style.display = 'block';
+    const step3 = document.getElementById('step-3');
+    const dateContainer = step3.querySelector('.form-group');
+    const timeContainer = step3.querySelector('#time-slots')?.closest('.form-group');
+    
+    if (dateContainer) {
+        dateContainer.innerHTML = `
+            <label for="appointment-date">Datum auswählen</label>
+            <select id="appointment-date" required>
+                <option value="">Bitte wählen Sie ein Datum</option>
+            </select>
+        `;
+    }
+    
+    if (timeContainer) {
+        timeContainer.style.display = 'block';
+    }
 }
 
 // Dynamischen Kalender rendern
