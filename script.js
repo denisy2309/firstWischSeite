@@ -22,19 +22,45 @@ const TRAVEL_TIME = 30; // Minuten
 const postalCodeMapping = {
     'Nordrhein-Westfalen': {
         ranges: [
-            { start: 40000, end: 48999 },
-            { start: 50000, end: 53999 },
-            { start: 57000, end: 59999 }
+            // PLZ-Bereich 3 (Nordosten NRW - Ostwestfalen-Lippe)
+            { start: 32000, end: 34999 },
+            
+            // PLZ-Bereich 4 (Norden/Ruhrgebiet)
+            { start: 40000, end: 48432 },
+            { start: 48466, end: 48477 },
+            { start: 48481, end: 48485 },
+            { start: 48489, end: 48496 },
+            { start: 48541, end: 48739 },
+            { start: 49461, end: 49549 },
+            
+            // PLZ-Bereich 5 (Süden/Rheinland)
+            { start: 50001, end: 51597 },
+            { start: 51601, end: 53359 },
+            { start: 53581, end: 53604 },
+            { start: 53621, end: 53949 },
+            { start: 57001, end: 57489 },
+            { start: 58001, end: 59966 }
         ],
         contractor: 'Subunternehmer NRW'
     },
     'Niedersachsen': {
         ranges: [
+            // PLZ-Bereich 2 (Norden - Küste und Bremen-Umland)
+            { start: 21000, end: 21999 },
             { start: 26000, end: 27999 },
             { start: 28000, end: 29999 },
+            
+            // PLZ-Bereich 3 (Süden - Hannover-Region)
             { start: 30000, end: 31999 },
             { start: 37000, end: 38999 },
-            { start: 49000, end: 49999 }
+            
+            // PLZ-Bereich 4 (Westen - Grenze zu NRW)
+            { start: 48442, end: 48465 },
+            { start: 48478, end: 48480 },
+            { start: 48486, end: 48488 },
+            { start: 48497, end: 48531 },
+            { start: 49001, end: 49459 },
+            { start: 49551, end: 49849 }
         ],
         contractor: 'Subunternehmer Niedersachsen'
     }
