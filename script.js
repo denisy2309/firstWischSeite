@@ -365,6 +365,7 @@ function goToStep(step) {
                     `;
                 }
             }
+            hideGlobalLoading();
             renderDynamicCalendar();
         }
 
