@@ -99,6 +99,55 @@ function getGermanTimestamp() {
     return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 }
 
+// Globales Loading-Overlay
+function showGlobalLoading(message = 'Lädt...') {
+    // Prüfen ob Overlay bereits existiert
+    let overlay = document.getElementById('global-loading-overlay');
+    
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'global-loading-overlay';
+        overlay.innerHTML = `
+            <div style="background: rgba(0, 0, 0, 0.7); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                <div style="background: white; padding: 2rem 3rem; border-radius: 1rem; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                    <div style="display: inline-block; width: 50px; height: 50px; border: 5px solid #e5e7eb; border-top-color: #2563eb; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <p id="loading-message" style="margin-top: 1rem; font-size: 1.1rem; font-weight: 500; color: #1f2937;"></p>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+    
+    // Nachricht aktualisieren
+    const messageElement = overlay.querySelector('#loading-message');
+    if (messageElement) {
+        messageElement.textContent = message;
+    }
+    
+    overlay.style.display = 'block';
+    
+    // Alle Buttons und Inputs deaktivieren
+    document.querySelectorAll('button, input, select').forEach(el => {
+        el.disabled = true;
+        el.dataset.wasDisabled = el.disabled;
+    });
+}
+
+function hideGlobalLoading() {
+    const overlay = document.getElementById('global-loading-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+    
+    // Alle Buttons und Inputs wieder aktivieren (außer die, die vorher disabled waren)
+    document.querySelectorAll('button, input, select').forEach(el => {
+        if (el.dataset.wasDisabled !== 'true') {
+            el.disabled = false;
+        }
+        delete el.dataset.wasDisabled;
+    });
+}
+
 // PLZ zu Bundesland und Subunternehmer zuordnen
 function getContractorFromPostalCode(postalCode) {
     const plz = parseInt(postalCode);
@@ -157,8 +206,16 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
     document.getElementById('change-customer-btn').addEventListener('click', () => goToStep(1));
     document.getElementById('continue-to-date-btn').addEventListener('click', async () => {
-        await fetchAvailableSlots();
-        goToStep(3);
+        showGlobalLoading('Verfügbare Termine werden geladen...\nDies kann einige Sekunden dauern.');
+        
+        try {
+            await fetchAvailableSlots();
+            goToStep(3);
+        } catch (error) {
+            console.error('Fehler beim Laden:', error);
+        } finally {
+            hideGlobalLoading();
+        }
     });
     document.getElementById('back-to-services-btn').addEventListener('click', () => {
         // Terminauswahl zurücksetzen
@@ -293,6 +350,24 @@ function goToStep(step) {
     } else if (step === 3) {
         displayServicesSummary();
 
+        // Kalender rendern wenn Slots vorhanden sind
+        if (Object.keys(availableSlots).length > 0) {
+            // Datum-Dropdown erstellen falls nicht vorhanden
+            const dateSelect = document.getElementById('appointment-date');
+            if (!dateSelect) {
+                const container = document.querySelector('#step-3 .form-group');
+                if (container) {
+                    container.innerHTML = `
+                        <label for="appointment-date">Datum auswählen</label>
+                        <select id="appointment-date" required>
+                            <option value="">Bitte wählen Sie ein Datum</option>
+                        </select>
+                    `;
+                }
+            }
+            renderDynamicCalendar();
+        }
+
         // NEU: Zeitslots zurücksetzen wenn man zu Schritt 3 kommt
         const timeSlotsDiv = document.getElementById('time-slots');
         if (timeSlotsDiv) {
@@ -381,15 +456,11 @@ function displayServicesSummary() {
 
 // Verfügbare Slots vom Backend abrufen
 async function fetchAvailableSlots() {
-    isLoadingSlots = true;
-    showLoadingState();
-    
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
     
     if (!contractorInfo) {
+        hideGlobalLoading();
         alert('Entschuldigung, für Ihre Postleitzahl bieten wir derzeit keinen Service an.');
-        isLoadingSlots = false;
-        hideLoadingState();
         return;
     }
     
@@ -468,20 +539,14 @@ async function fetchAvailableSlots() {
                     delete availableSlots[today];
                 }
             }
-
-            // WICHTIG: Erst Loading beenden, DANN Kalender rendern
-            hideLoadingState();
-            renderDynamicCalendar();
         } else {
-            hideLoadingState();
+            hideGlobalLoading();
             alert('Fehler beim Laden der verfügbaren Termine. Bitte versuchen Sie es erneut.');
         }
     } catch (error) {
         console.error('Fehler beim Abrufen der Termine:', error);
-        hideLoadingState();
+        hideGlobalLoading();
         alert('Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
-    } finally {
-        isLoadingSlots = false;
     }
 }
 
