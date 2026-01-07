@@ -441,27 +441,21 @@ async function fetchAvailableSlots() {
             const now = new Date();
             const today = now.toISOString().split('T')[0];
 
-            console.log('Heutiges Datum für Filter:', today);
-            console.log('Aktuelle Uhrzeit:', now.toTimeString().substring(0, 5));
-            console.log('Slots vor Filter:', JSON.stringify(availableSlots));
-
             if (availableSlots[today]) {
-                console.log('Heutige Slots gefunden:', availableSlots[today]);
+                const currentHours = now.getHours();
+                const currentMinutes = now.getMinutes();
+                const currentTimeInMinutes = currentHours * 60 + currentMinutes;
+                const minTimeInMinutes = currentTimeInMinutes + 120; // +2 Stunden in Minuten
                 
-                const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 Stunden
-                const minHours = minTime.getHours();
-                const minMinutes = minTime.getMinutes();
-                const minTimeString = `${String(minHours).padStart(2, '0')}:${String(minMinutes).padStart(2, '0')}`;
-                
-                console.log('Minimal benötigte Zeit:', minTimeString);
+                console.log(`Aktuelle Zeit: ${currentHours}:${String(currentMinutes).padStart(2, '0')} (${currentTimeInMinutes} Min)`);
+                console.log(`Minimal benötigte Zeit: ${minTimeInMinutes} Min (= ${Math.floor(minTimeInMinutes/60)}:${String(minTimeInMinutes%60).padStart(2, '0')})`);
                 
                 availableSlots[today] = availableSlots[today].filter(time => {
                     const [hours, minutes] = time.split(':').map(Number);
                     const timeInMinutes = hours * 60 + minutes;
-                    const minTimeInMinutes = minHours * 60 + minMinutes;
                     
                     const isValid = timeInMinutes >= minTimeInMinutes;
-                    console.log(`Zeit ${time}: ${timeInMinutes} >= ${minTimeInMinutes}? ${isValid}`);
+                    console.log(`Zeit ${time}: ${timeInMinutes} Min >= ${minTimeInMinutes} Min? ${isValid}`);
                     
                     return isValid;
                 });
@@ -473,11 +467,7 @@ async function fetchAvailableSlots() {
                     console.log('Keine Slots übrig, entferne heutigen Tag');
                     delete availableSlots[today];
                 }
-            } else {
-                console.log('KEINE heutigen Slots in den Daten gefunden');
             }
-
-            console.log('Finale Slots:', JSON.stringify(availableSlots));
 
             // WICHTIG: Erst Loading beenden, DANN Kalender rendern
             hideLoadingState();
