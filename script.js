@@ -160,7 +160,25 @@ document.addEventListener('DOMContentLoaded', function() {
         await fetchAvailableSlots();
         goToStep(3);
     });
-    document.getElementById('back-to-services-btn').addEventListener('click', () => goToStep(2));
+    document.getElementById('back-to-services-btn').addEventListener('click', () => {
+        // Terminauswahl zurücksetzen
+        selectedDate = '';
+        selectedTime = '';
+        
+        const dateSelect = document.getElementById('appointment-date');
+        if (dateSelect) {
+            dateSelect.value = '';
+        }
+        
+        const timeSlotsDiv = document.getElementById('time-slots');
+        if (timeSlotsDiv) {
+            timeSlotsDiv.innerHTML = '';
+        }
+        
+        document.getElementById('submit-booking-btn').disabled = true;
+        
+        goToStep(2);
+    });
     document.getElementById('submit-booking-btn').addEventListener('click', submitBooking);
     document.getElementById('new-booking-btn').addEventListener('click', () => {
         resetBooking();
@@ -204,6 +222,18 @@ function resetBooking() {
     selectedDate = '';
     selectedTime = '';
     availableSlots = {};
+
+    // Datum-Dropdown zurücksetzen
+    const dateSelect = document.getElementById('appointment-date');
+    if (dateSelect) {
+        dateSelect.innerHTML = '<option value="">Bitte wählen Sie ein Datum</option>';
+    }
+    
+    // Zeitslots leeren
+    const timeSlotsDiv = document.getElementById('time-slots');
+    if (timeSlotsDiv) {
+        timeSlotsDiv.innerHTML = '';
+    }
     
     const submitBtn = document.getElementById('submit-booking-btn');
     submitBtn.disabled = true;
@@ -262,6 +292,12 @@ function goToStep(step) {
         renderServices();
     } else if (step === 3) {
         displayServicesSummary();
+
+        // NEU: Zeitslots zurücksetzen wenn man zu Schritt 3 kommt
+        const timeSlotsDiv = document.getElementById('time-slots');
+        if (timeSlotsDiv) {
+            timeSlotsDiv.innerHTML = '';
+        }
     }
 }
 
