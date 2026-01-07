@@ -438,26 +438,46 @@ async function fetchAvailableSlots() {
             }
 
             // NEU: Heutige Slots filtern (nur Zeiten mindestens 2 Stunden in Zukunft)
-            const today = new Date().toISOString().split('T')[0];
+            const now = new Date();
+            const today = now.toISOString().split('T')[0];
+
+            console.log('Heutiges Datum für Filter:', today);
+            console.log('Aktuelle Uhrzeit:', now.toTimeString().substring(0, 5));
+            console.log('Slots vor Filter:', JSON.stringify(availableSlots));
+
             if (availableSlots[today]) {
-                const now = new Date();
+                console.log('Heutige Slots gefunden:', availableSlots[today]);
+                
                 const minTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 Stunden
                 const minHours = minTime.getHours();
                 const minMinutes = minTime.getMinutes();
+                const minTimeString = `${String(minHours).padStart(2, '0')}:${String(minMinutes).padStart(2, '0')}`;
+                
+                console.log('Minimal benötigte Zeit:', minTimeString);
                 
                 availableSlots[today] = availableSlots[today].filter(time => {
                     const [hours, minutes] = time.split(':').map(Number);
                     const timeInMinutes = hours * 60 + minutes;
                     const minTimeInMinutes = minHours * 60 + minMinutes;
                     
-                    return timeInMinutes >= minTimeInMinutes;
+                    const isValid = timeInMinutes >= minTimeInMinutes;
+                    console.log(`Zeit ${time}: ${timeInMinutes} >= ${minTimeInMinutes}? ${isValid}`);
+                    
+                    return isValid;
                 });
+                
+                console.log('Heutige Slots nach Filter:', availableSlots[today]);
                 
                 // Wenn keine Zeiten mehr übrig sind, entferne den heutigen Tag komplett
                 if (availableSlots[today].length === 0) {
+                    console.log('Keine Slots übrig, entferne heutigen Tag');
                     delete availableSlots[today];
                 }
+            } else {
+                console.log('KEINE heutigen Slots in den Daten gefunden');
             }
+
+            console.log('Finale Slots:', JSON.stringify(availableSlots));
 
             // WICHTIG: Erst Loading beenden, DANN Kalender rendern
             hideLoadingState();
