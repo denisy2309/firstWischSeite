@@ -70,18 +70,23 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="birthdate">Geburtsdatum</label>
+                        <input type="date" id="birthdate" name="birthdate" required>
+                    </div>
+
+                    <div class="form-group">
                         <label for="healthInsurance">Krankenversicherung</label>
-                        <input type="text" id="healthInsurance" name="healthInsurance" placeholder="z.B. AOK, TK, Barmer">
+                        <input type="text" id="healthInsurance" name="healthInsurance" placeholder="z.B. AOK, TK, Barmer" required>
                     </div>
 
                     <div class="form-group">
                         <label for="insuranceNumber">Versicherungsnummer</label>
-                        <input type="text" id="insuranceNumber" name="insuranceNumber" placeholder="12345678901">
+                        <input type="text" id="insuranceNumber" name="insuranceNumber" placeholder="12345678901" required>
                     </div>
 
                     <div class="form-group">
                         <label for="careLevel">Pflegestufe</label>
-                        <select id="careLevel" name="careLevel">
+                        <select id="careLevel" name="careLevel" required>
                             <option value="">Bitte wählen</option>
                             <option value="1">Pflegegrad 1</option>
                             <option value="2">Pflegegrad 2</option>
@@ -89,6 +94,13 @@
                             <option value="4">Pflegegrad 4</option>
                             <option value="5">Pflegegrad 5</option>
                         </select>
+                    </div>
+
+                    <div class="form-group" style="display: flex; align-items: flex-start; gap: 0.5rem;">
+                        <input type="checkbox" id="acceptAssignment" name="acceptAssignment" required style="width: auto; margin-top: 0.25rem;">
+                        <label for="acceptAssignment" style="margin: 0; cursor: pointer;">
+                            Hiermit bestätige ich die Abtretungserklärung <span style="color: red;">*</span>
+                        </label>
                     </div>
 
                     <button type="submit" class="btn btn-primary">Weiter zur Leistungsauswahl</button>

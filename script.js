@@ -250,6 +250,14 @@ function handleCustomerFormSubmit(e) {
     e.preventDefault();
     
     const formData = new FormData(e.target);
+
+    // Checkbox-Validierung
+    const acceptAssignment = formData.get('acceptAssignment');
+    if (!acceptAssignment) {
+        alert('Bitte bestätigen Sie die Abtretungserklärung.');
+        return;
+    }
+
     const data = {
         fullName: formData.get('fullName'),
         street: formData.get('street'),
@@ -257,6 +265,7 @@ function handleCustomerFormSubmit(e) {
         postalCode: formData.get('postalCode'),
         city: formData.get('city'),
         phone: formData.get('phone'),
+        birthdate: formData.get('birthdate'),
         healthInsurance: formData.get('healthInsurance'),
         insuranceNumber: formData.get('insuranceNumber'),
         careLevel: formData.get('careLevel')
@@ -315,9 +324,12 @@ function fillCustomerForm() {
         document.getElementById('postalCode').value = customerData.postalCode || '';
         document.getElementById('city').value = customerData.city || '';
         document.getElementById('phone').value = customerData.phone || '';
+        document.getElementById('birthdate').value = customerData.birthdate || '';
         document.getElementById('healthInsurance').value = customerData.healthInsurance || '';
         document.getElementById('insuranceNumber').value = customerData.insuranceNumber || '';
         document.getElementById('careLevel').value = customerData.careLevel || '';
+        // Checkbox immer angehakt lassen wenn Daten vorhanden
+        document.getElementById('acceptAssignment').checked = true;
     }
 }
 
@@ -378,9 +390,11 @@ function goToStep(step) {
 }
 
 function displayCustomerInfo() {
+    const birthdate = customerData.birthdate ? formatDate(customerData.birthdate) : 'Nicht angegeben';
     const infoBox = document.getElementById('customer-info');
     infoBox.innerHTML = `
         <strong>Kunde:</strong> ${customerData.fullName}<br>
+        <strong>Geburtsdatum:</strong> ${birthdate}<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
         <strong>Telefon:</strong> ${customerData.phone}
     `;
