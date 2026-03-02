@@ -7,12 +7,32 @@ let selectedTime = '';
 let availableSlots = {}; // Format: { "2026-01-08": ["07:00", "09:00"], ... }
 let isLoadingSlots = false;
 
-// Services-Daten mit Zeitangaben
-const services = [
-    { id: 'windows', name: 'Fenster putzen', price: 45, duration: 40 },
-    { id: 'floors', name: 'Böden reinigen', price: 35, duration: 30 },
-    { id: 'bathroom', name: 'Badezimmer reinigen', price: 40, duration: 25 },
-    { id: 'kitchen', name: 'Küche reinigen', price: 40, duration: 25 }
+// Services-Daten mit Kategorien
+const serviceCategories = [
+    {
+        id: 'window-cleaning',
+        name: 'Fensterreinigung',
+        expanded: false,
+        services: [
+            { id: 'window-glass', name: 'Fensterreinigung (nur Glas)' },
+            { id: 'window-frame', name: 'Mit Rahmen' },
+            { id: 'window-frame-rebate', name: 'Mit Rahmen und Falz' }
+        ]
+    },
+    {
+        id: 'deep-cleaning',
+        name: 'Grundreinigung',
+        expanded: false,
+        type: 'contact',
+        message: 'Bitte kontaktieren Sie uns für ein persönliches Angebot'
+    },
+    {
+        id: 'maintenance-cleaning',
+        name: 'Unterhaltsreinigung',
+        expanded: false,
+        type: 'coming-soon',
+        message: 'Bald verfügbar'
+    }
 ];
 
 // Konstanten für Zeitberechnung
@@ -181,6 +201,15 @@ function calculateServiceDuration() {
 // Gesamtdauer inkl. Anfahrt für Backend berechnen
 function calculateTotalDurationForBackend() {
     return calculateServiceDuration() + TRAVEL_TIME;
+}
+
+// Kategorie auf-/zuklappen
+function toggleCategory(categoryId) {
+    const category = serviceCategories.find(c => c.id === categoryId);
+    if (category) {
+        category.expanded = !category.expanded;
+        renderServices();
+    }
 }
 
 
@@ -420,24 +449,59 @@ function renderServices() {
     const servicesList = document.getElementById('services-list');
     servicesList.innerHTML = '';
 
-    services.forEach(service => {
-        const quantity = selectedServices[service.id] || 0;
-
-        const serviceDiv = document.createElement('div');
-        serviceDiv.className = `service-item ${quantity > 0 ? 'selected' : ''}`;
-        serviceDiv.innerHTML = `
-            <div class="service-header">
-                <span class="service-name">${service.name}</span>
-            </div>
-            <div class="service-controls">
-                <div class="quantity-controls">
-                    <button class="quantity-btn minus" onclick="updateQuantity('${service.id}', -1)" ${quantity === 0 ? 'disabled' : ''}>−</button>
-                    <span class="quantity-display">${quantity}</span>
-                    <button class="quantity-btn plus" onclick="updateQuantity('${service.id}', 1)">+</button>
-                </div>
-            </div>
+    serviceCategories.forEach(category => {
+        // Kategorie-Container
+        const categoryDiv = document.createElement('div');
+        categoryDiv.className = 'category-item';
+        
+        // Kategorie-Header (klickbar)
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'category-header';
+        headerDiv.onclick = () => toggleCategory(category.id);
+        headerDiv.innerHTML = `
+            <span class="category-name">${category.name}</span>
+            <span class="category-arrow">${category.expanded ? '▼' : '▶'}</span>
         `;
-        servicesList.appendChild(serviceDiv);
+        categoryDiv.appendChild(headerDiv);
+        
+        // Kategorie-Inhalt (nur wenn aufgeklappt)
+        if (category.expanded) {
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'category-content';
+            
+            if (category.type === 'contact') {
+                // Kontakt-Hinweis
+                contentDiv.innerHTML = `
+                    <p class="category-message">${category.message}</p>
+                `;
+            } else if (category.type === 'coming-soon') {
+                // Bald verfügbar-Hinweis
+                contentDiv.innerHTML = `
+                    <p class="category-message coming-soon">${category.message}</p>
+                `;
+            } else if (category.services) {
+                // Services der Kategorie
+                category.services.forEach(service => {
+                    const quantity = selectedServices[service.id] || 0;
+                    
+                    const serviceDiv = document.createElement('div');
+                    serviceDiv.className = `service-item ${quantity > 0 ? 'selected' : ''}`;
+                    serviceDiv.innerHTML = `
+                        <div class="service-name">${service.name}</div>
+                        <div class="quantity-controls">
+                            <button class="quantity-btn minus" onclick="updateQuantity('${service.id}', -1)" ${quantity === 0 ? 'disabled' : ''}>−</button>
+                            <span class="quantity-display">${quantity}</span>
+                            <button class="quantity-btn plus" onclick="updateQuantity('${service.id}', 1)">+</button>
+                        </div>
+                    `;
+                    contentDiv.appendChild(serviceDiv);
+                });
+            }
+            
+            categoryDiv.appendChild(contentDiv);
+        }
+        
+        servicesList.appendChild(categoryDiv);
     });
 
     updateContinueButton();
