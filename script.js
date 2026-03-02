@@ -14,9 +14,9 @@ const serviceCategories = [
         name: 'Fensterreinigung',
         expanded: false,
         services: [
-            { id: 'window-glass', name: 'Fensterreinigung (nur Glas)' },
-            { id: 'window-frame', name: 'Mit Rahmen' },
-            { id: 'window-frame-rebate', name: 'Mit Rahmen und Falz' }
+            { id: 'window-glass', name: 'Fensterreinigung (nur Glas)', duration: 5 },
+            { id: 'window-frame', name: 'Mit Rahmen', duration: 6 },
+            { id: 'window-frame-rebate', name: 'Mit Rahmen und Falz', duration: 8 }
         ]
     },
     {
@@ -37,6 +37,7 @@ const serviceCategories = [
 
 // Konstanten für Zeitberechnung
 const TRAVEL_TIME = 30; // Minuten
+const DOCUMENTATION_TIME = 15; // Minuten
 
 // PLZ zu Bundesland Mapping (NRW und Niedersachsen)
 const postalCodeMapping = {
@@ -186,21 +187,68 @@ function getContractorFromPostalCode(postalCode) {
     return null;
 }
 
-// Gesamtdauer berechnen (NUR Leistungen für Frontend-Anzeige)
+// Reine Arbeitszeit der Leistungen berechnen
 function calculateServiceDuration() {
     let serviceDuration = 0;
     
     Object.entries(selectedServices).forEach(([id, quantity]) => {
-        const service = services.find(s => s.id === id);
-        serviceDuration += service.duration * quantity;
+        // Alle Services aus allen Kategorien durchsuchen
+        serviceCategories.forEach(category => {
+            if (category.services) {
+                const service = category.services.find(s => s.id === id);
+                if (service) {
+                    serviceDuration += service.duration * quantity;
+                }
+            }
+        });
     });
     
     return serviceDuration;
 }
 
-// Gesamtdauer inkl. Anfahrt für Backend berechnen
+// Gesamtdauer für Frontend berechnen (mit Doku + Anfahrt)
+function calculateTotalDurationForFrontend() {
+    const serviceDuration = calculateServiceDuration();
+    return serviceDuration + DOCUMENTATION_TIME + TRAVEL_TIME;
+}
+
+// Gesamtdauer für Backend berechnen (mit Doku + Anfahrt, OHNE Aufrundung)
 function calculateTotalDurationForBackend() {
-    return calculateServiceDuration() + TRAVEL_TIME;
+    return calculateTotalDurationForFrontend();
+}
+
+// Dauer auf 90, 120, 150, 180... Minuten aufrunden
+function roundUpDuration(minutes) {
+    const intervals = [90, 120, 150, 180, 210, 240, 270, 300, 330, 360]; // 1.5h, 2h, 2.5h, 3h, etc.
+    
+    // Wenn kleiner als 90 Minuten, auf 90 aufrunden
+    if (minutes < 90) {
+        return 90;
+    }
+    
+    // Auf nächstes 30-Minuten-Intervall aufrunden
+    for (let interval of intervals) {
+        if (minutes <= interval) {
+            return interval;
+        }
+    }
+    
+    // Falls länger als 6 Stunden, auf nächste 30 Minuten aufrunden
+    return Math.ceil(minutes / 30) * 30;
+}
+
+// Minuten in Stunden und Minuten formatieren
+function formatDuration(minutes) {
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (mins === 0) {
+        return `${hours} Std`;
+    } else if (hours === 0) {
+        return `${mins} Min`;
+    } else {
+        return `${hours} Std ${mins} Min`;
+    }
 }
 
 // Kategorie auf-/zuklappen
@@ -528,20 +576,26 @@ function updateContinueButton() {
 function displayServicesSummary() {
     const summaryDiv = document.getElementById('services-summary');
     const serviceDuration = calculateServiceDuration();
+    const totalDuration = calculateTotalDurationForFrontend();
+    const roundedDuration = roundUpDuration(totalDuration);
+    
     let html = '<strong>Ausgewählte Leistungen:</strong><br><ul class="booking-summary">';
-    let totalPrice = 0;
 
     Object.entries(selectedServices).forEach(([id, quantity]) => {
-        const service = services.find(s => s.id === id);
-        const price = quantity * service.price;
-        const duration = quantity * service.duration;
-        totalPrice += price;
-        html += `<li>${service.name} x${quantity} (${price}€, ${duration} Min)</li>`;
+        // Service in allen Kategorien suchen
+        serviceCategories.forEach(category => {
+            if (category.services) {
+                const service = category.services.find(s => s.id === id);
+                if (service) {
+                    html += `<li>${service.name} x${quantity} </li>`;
+                }
+            }
+        });
     });
 
     html += `</ul><div class="total-section">`;
-    html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
-    html += `<strong>Geschätzte Dauer: ${serviceDuration} Minuten</strong>`;
+    html += `<hr style="margin: 0.5rem 0; border: none; border-top: 1px solid #d1d5db;">`;
+    html += `<strong>Geschätzte Gesamtdauer: ${formatDuration(roundedDuration)}</strong>`;
     html += `</div>`;
     summaryDiv.innerHTML = html;
 }
@@ -764,31 +818,37 @@ async function submitBooking() {
     submitBtn.textContent = 'Wird gesendet...';
 
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
+    const serviceDuration = calculateServiceDuration();
     const totalDurationForBackend = calculateTotalDurationForBackend();
 
     const servicesWithQuantity = Object.entries(selectedServices).map(([id, quantity]) => {
-        const service = services.find(s => s.id === id);
-        const totalPrice = quantity * service.price;
+        let service = null;
+        
+        // Service in allen Kategorien suchen
+        serviceCategories.forEach(category => {
+            if (category.services) {
+                const foundService = category.services.find(s => s.id === id);
+                if (foundService) {
+                    service = foundService;
+                }
+            }
+        });
+        
+        if (!service) return null;
+        
         return {
             id: service.id,
             name: service.name,
             quantity: quantity,
-            pricePerUnit: `${service.price}€`,
-            totalPrice: `${totalPrice}€`,
-            duration: service.duration * quantity
+            durationPerUnit: service.duration,
+            totalDuration: service.duration * quantity
         };
-    });
-
-    let totalPrice = 0;
-    servicesWithQuantity.forEach(s => {
-        totalPrice += parseInt(s.totalPrice);
-    });
+    }).filter(s => s !== null);
 
     const bookingData = {
         customer: customerData,
         contractor: contractorInfo.contractor,
         services: servicesWithQuantity,
-        totalPrice: `${totalPrice}€`,
         totalDuration: totalDurationForBackend,
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
@@ -807,7 +867,7 @@ async function submitBooking() {
         const result = await response.json();
 
         if (response.ok && result.success) {
-            displayConfirmation(totalPrice);
+            displayConfirmation();
             goToStep(4);
             submitBtn.textContent = 'Buchung abschließen';
         } else {
@@ -824,9 +884,10 @@ async function submitBooking() {
 }
 
 
-function displayConfirmation(totalPrice) {
+function displayConfirmation() {
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
-    const serviceDuration = calculateServiceDuration();
+    const totalDuration = calculateTotalDurationForFrontend();
+    const roundedDuration = roundUpDuration(totalDuration);
     
     const confirmationDiv = document.getElementById('booking-confirmation');
     let html = `
@@ -838,14 +899,19 @@ function displayConfirmation(totalPrice) {
     `;
 
     Object.entries(selectedServices).forEach(([id, quantity]) => {
-        const service = services.find(s => s.id === id);
-        const price = quantity * service.price;
-        html += `<li>${service.name} x${quantity} (${price}€)</li>`;
+        // Service in allen Kategorien suchen
+        serviceCategories.forEach(category => {
+            if (category.services) {
+                const service = category.services.find(s => s.id === id);
+                if (service) {
+                    html += `<li>${service.name} x${quantity}</li>`;
+                }
+            }
+        });
     });
 
     html += `</ul><div class="total-section">`;
-    html += `<strong>Gesamtpreis: ${totalPrice}€</strong><br>`;
-    html += `<strong>Dauer: ca. ${serviceDuration} Minuten</strong>`;
+    html += `<strong>Geschätzte Dauer: ${formatDuration(roundedDuration)}</strong>`;
     html += `</div>`;
     confirmationDiv.innerHTML = html;
 }
