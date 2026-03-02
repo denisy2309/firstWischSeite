@@ -839,9 +839,7 @@ async function submitBooking() {
         return {
             id: service.id,
             name: service.name,
-            quantity: quantity,
-            durationPerUnit: service.duration,
-            totalDuration: service.duration * quantity
+            quantity: quantity
         };
     }).filter(s => s !== null);
 
