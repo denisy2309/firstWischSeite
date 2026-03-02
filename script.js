@@ -391,12 +391,28 @@ function goToStep(step) {
 
 function displayCustomerInfo() {
     const birthdate = customerData.birthdate ? formatDate(customerData.birthdate) : 'Nicht angegeben';
+    
     const infoBox = document.getElementById('customer-info');
     infoBox.innerHTML = `
         <strong>Kunde:</strong> ${customerData.fullName}<br>
         <strong>Geburtsdatum:</strong> ${birthdate}<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
         <strong>Telefon:</strong> ${customerData.phone}
+    `;
+    
+    // Preisinfo-Box hinzufügen (falls noch nicht vorhanden)
+    let priceInfoBox = document.getElementById('price-info-box');
+    if (!priceInfoBox) {
+        priceInfoBox = document.createElement('div');
+        priceInfoBox.id = 'price-info-box';
+        priceInfoBox.className = 'info-box';
+        priceInfoBox.style.marginTop = '1rem';
+        infoBox.parentElement.insertBefore(priceInfoBox, infoBox.nextSibling);
+    }
+    
+    priceInfoBox.innerHTML = `
+        <strong>Preisberechnung:</strong><br>
+        38€/Stunde + 7€ Anfahrtspauschale
     `;
 }
 
@@ -406,14 +422,12 @@ function renderServices() {
 
     services.forEach(service => {
         const quantity = selectedServices[service.id] || 0;
-        const totalPrice = quantity * service.price;
 
         const serviceDiv = document.createElement('div');
         serviceDiv.className = `service-item ${quantity > 0 ? 'selected' : ''}`;
         serviceDiv.innerHTML = `
             <div class="service-header">
                 <span class="service-name">${service.name}</span>
-                <span class="service-price">${service.price}€ / Einheit (${service.duration} Min)</span>
             </div>
             <div class="service-controls">
                 <div class="quantity-controls">
@@ -421,7 +435,6 @@ function renderServices() {
                     <span class="quantity-display">${quantity}</span>
                     <button class="quantity-btn plus" onclick="updateQuantity('${service.id}', 1)">+</button>
                 </div>
-                ${quantity > 0 ? `<span class="total-price">${totalPrice}€</span>` : ''}
             </div>
         `;
         servicesList.appendChild(serviceDiv);
