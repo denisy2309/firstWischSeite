@@ -314,7 +314,7 @@ h2 {
 .total-section {
     margin-top: 0.75rem;
     padding-top: 0.75rem;
-    border-top: 1px solid #93c5fd;
+    border-top: none;
 }
 
 @media (max-width: 640px) {
