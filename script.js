@@ -847,7 +847,7 @@ async function submitBooking() {
         customer: customerData,
         contractor: contractorInfo.contractor,
         services: servicesWithQuantity,
-        totalDuration: formatDuration(totalDurationForBackend),
+        totalDuration: formatDuration(roundUpDuration(totalDurationForBackend)),
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
         timestamp: getGermanTimestamp()
