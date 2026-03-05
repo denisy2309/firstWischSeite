@@ -610,7 +610,7 @@ async function fetchAvailableSlots() {
         return;
     }
     
-    const totalDuration = calculateTotalDurationForBackend();
+    const totalDuration = roundUpDuration(calculateTotalDurationForBackend());
     
     // Zeitraum berechnen (heute + 30 Tage)
     const today = new Date();
@@ -625,7 +625,7 @@ async function fetchAvailableSlots() {
             endDate: endDate.toISOString().split('T')[0]
         },
         workingHours: {
-            start: '07:00',
+            start: '08:00',
             end: '18:00'
         }
     };
