@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
     document.getElementById('change-customer-btn').addEventListener('click', () => goToStep(1));
     document.getElementById('continue-to-date-btn').addEventListener('click', async () => {
-        showGlobalLoading('Verfügbare Termine werden geladen...\nDies kann einige Sekunden dauern.');
+        showGlobalLoading('Verfügbare Termine werden geladen...');
         
         try {
             await fetchAvailableSlots();
