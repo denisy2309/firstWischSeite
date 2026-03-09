@@ -18,7 +18,7 @@ app.post('/api/available-slots', async (req, res) => {
 
     try {
         // Request an n8n Webhook
-        const response = await fetch('http://localhost:5678/webhook-test/92a503ef-6e40-4af1-8620-1f7c89052b07', {
+        const response = await fetch('http://localhost:5678/webhook/92a503ef-6e40-4af1-8620-1f7c89052b07', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
