@@ -61,7 +61,7 @@ app.post('/api/validate-slot', async (req, res) => {
 
     try {
         // Request an n8n Webhook zur Validierung
-        const response = await fetch('http://localhost:5678/webhook/IHRE-VALIDIERUNGS-WEBHOOK-ID', {
+        const response = await fetch('http://localhost:5678/webhook/fb538b15-4398-4b3d-9ab6-aff307fbe9b7', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
