@@ -325,6 +325,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
     document.getElementById('change-customer-btn').addEventListener('click', () => goToStep(1));
     document.getElementById('continue-to-date-btn').addEventListener('click', async () => {
+        selectedDate = '';
+        selectedTime = '';
+
         showGlobalLoading('Verfügbare Termine werden geladen...');
         
         try {
