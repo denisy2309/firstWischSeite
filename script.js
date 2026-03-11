@@ -497,13 +497,6 @@ function goToStep(step) {
         }
         displayServicesSummary();
 
-        // Submit-Button initial deaktivieren
-        const submitBtn = document.getElementById('submit-booking-btn');
-        console.log('Submit-Button:', submitBtn);
-        if (submitBtn) {
-            submitBtn.disabled = true;
-        }
-
         // Kalender rendern wenn Slots vorhanden sind
         if (Object.keys(availableSlots).length > 0) {
             // Datum-Dropdown erstellen falls nicht vorhanden
@@ -530,13 +523,10 @@ function goToStep(step) {
         }
 
         // Submit-Button EXPLIZIT deaktivieren
-        setTimeout(() => {
-            const submitBtn = document.getElementById('submit-booking-btn');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-                console.log('Submit-Button deaktiviert');
-            }
-        }, 100);
+        const submitBtn = document.getElementById('submit-booking-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
     } else if (step === 4) {
         // NEU: Button aktivieren wenn zu Schritt 4 gewechselt wird
         const newBookingBtn = document.getElementById('new-booking-btn');
