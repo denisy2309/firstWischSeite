@@ -169,6 +169,48 @@ function hideGlobalLoading() {
     });
 }
 
+function showErrorMessage(title, message, buttonText = 'OK') {
+    // Prüfen ob Overlay bereits existiert
+    let overlay = document.getElementById('error-message-overlay');
+    
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'error-message-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+    overlay.innerHTML = `
+        <div style="background: rgba(0, 0, 0, 0.7); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 2rem 2.5rem; border-radius: 1rem; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; margin: 1rem;">
+                <div style="width: 60px; height: 60px; background-color: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <span style="font-size: 2rem; color: #dc2626;">⚠️</span>
+                </div>
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.5rem; font-weight: 600; color: #1f2937;">${title}</h3>
+                <p style="margin: 0 0 1.5rem 0; font-size: 1rem; color: #6b7280; line-height: 1.5;">${message}</p>
+                <button id="error-message-btn" style="background-color: #2563eb; color: white; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s;" 
+                    onmouseover="this.style.backgroundColor='#1d4ed8'" 
+                    onmouseout="this.style.backgroundColor='#2563eb'">
+                    ${buttonText}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    overlay.style.display = 'block';
+    
+    // Button-Handler
+    document.getElementById('error-message-btn').addEventListener('click', () => {
+        hideErrorMessage();
+    });
+}
+
+function hideErrorMessage() {
+    const overlay = document.getElementById('error-message-overlay');
+    if (overlay) {
+        overlay.style.display = 'none';
+    }
+}
+
 // PLZ zu Bundesland und Subunternehmer zuordnen
 function getContractorFromPostalCode(postalCode) {
     const plz = parseInt(postalCode);
@@ -331,7 +373,11 @@ function handleCustomerFormSubmit(e) {
     // Checkbox-Validierung
     const acceptAssignment = formData.get('acceptAssignment');
     if (!acceptAssignment) {
-        alert('Bitte bestätigen Sie die Abtretungserklärung.');
+        showErrorMessage(
+            'Abtretungserklärung erforderlich',
+            'Bitte bestätigen Sie die Abtretungserklärung, um fortzufahren.',
+            'OK'
+        );
         return;
     }
 
@@ -351,7 +397,11 @@ function handleCustomerFormSubmit(e) {
     // Prüfen ob PLZ unterstützt wird
     const contractorInfo = getContractorFromPostalCode(data.postalCode);
     if (!contractorInfo) {
-        alert('Entschuldigung, für Ihre Postleitzahl (NRW und Niedersachsen) bieten wir derzeit keinen Service an. Bitte überprüfen Sie Ihre Eingabe.');
+        showErrorMessage(
+            'Postleitzahl nicht unterstützt',
+            'Entschuldigung, für Ihre Postleitzahl bieten wir derzeit nur Service in NRW und Niedersachsen an. Bitte überprüfen Sie Ihre Eingabe.',
+            'OK'
+        );
         return;
     }
 
@@ -622,7 +672,11 @@ async function fetchAvailableSlots() {
     
     if (!contractorInfo) {
         hideGlobalLoading();
-        alert('Entschuldigung, für Ihre Postleitzahl bieten wir derzeit keinen Service an.');
+        showErrorMessage(
+            'Kein Service verfügbar',
+            'Entschuldigung, für Ihre Postleitzahl bieten wir derzeit keinen Service an.',
+            'OK'
+        );
         return;
     }
     
@@ -703,12 +757,20 @@ async function fetchAvailableSlots() {
             }
         } else {
             hideGlobalLoading();
-            alert('Fehler beim Laden der verfügbaren Termine. Bitte versuchen Sie es erneut.');
+            showErrorMessage(
+                'Fehler beim Laden',
+                'Fehler beim Laden der verfügbaren Termine. Bitte versuchen Sie es erneut.',
+                'Erneut versuchen'
+            );
         }
     } catch (error) {
         console.error('Fehler beim Abrufen der Termine:', error);
         hideGlobalLoading();
-        alert('Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
+        showErrorMessage(
+            'Verbindungsfehler',
+            'Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
+            'OK'
+        );
     }
 }
 
@@ -909,7 +971,11 @@ async function submitBooking() {
         hideGlobalLoading();
         
         // Slot ist nicht mehr verfügbar
-        alert('Dieser Termin wurde gerade von einem anderen Kunden gebucht. Bitte wählen Sie einen anderen Zeitpunkt.');
+        showErrorMessage(
+            'Termin nicht mehr verfügbar',
+            'Dieser Termin wurde gerade von einem anderen Kunden gebucht. Bitte wählen Sie einen anderen Zeitpunkt.',
+            'Neuen Termin wählen'
+        );
         
         // Ausgegraueten/entfernten Slot aus der Anzeige entfernen
         removeUnavailableSlot(selectedDate, selectedTime);
@@ -981,14 +1047,22 @@ async function submitBooking() {
             submitBtn.textContent = 'Buchung abschließen';
         } else {
             hideGlobalLoading();
-            alert('Fehler beim Senden der Buchung: ' + (result.message || 'Unbekannter Fehler'));
+            showErrorMessage(
+                'Fehler beim Senden',
+                'Fehler beim Senden der Buchung: ' + (result.message || 'Unbekannter Fehler'),
+                'Erneut versuchen'
+            );
             submitBtn.disabled = false;
             submitBtn.textContent = 'Buchung abschließen';
         }
     } catch (error) {
         console.error('Fehler:', error);
         hideGlobalLoading();
-        alert('Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
+        showErrorMessage(
+            'Verbindungsfehler',
+            'Bitte überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut.',
+            'OK'
+        );
         submitBtn.disabled = false;
         submitBtn.textContent = 'Buchung abschließen';
     }
