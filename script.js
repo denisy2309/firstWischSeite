@@ -437,6 +437,10 @@ function goToStep(step) {
         displayCustomerInfo();
         renderServices();
     } else if (step === 3) {
+        if (!selectedDate || !selectedTime) {
+            selectedDate = '';
+            selectedTime = '';
+        }
         displayServicesSummary();
 
         // Submit-Button initial deaktivieren
