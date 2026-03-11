@@ -528,6 +528,15 @@ function goToStep(step) {
         if (timeSlotsDiv) {
             timeSlotsDiv.innerHTML = '';
         }
+
+        // Submit-Button EXPLIZIT deaktivieren
+        setTimeout(() => {
+            const submitBtn = document.getElementById('submit-booking-btn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                console.log('Submit-Button deaktiviert');
+            }
+        }, 100);
     } else if (step === 4) {
         // NEU: Button aktivieren wenn zu Schritt 4 gewechselt wird
         const newBookingBtn = document.getElementById('new-booking-btn');
