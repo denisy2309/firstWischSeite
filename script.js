@@ -711,7 +711,7 @@ async function validateSelectedSlot() {
                 contractor: contractorInfo.contractor,
                 date: selectedDate,
                 time: selectedTime,
-                requiredDuration: totalDuration
+                requiredDuration: roundUpDuration(totalDuration)
             })
         });
         
