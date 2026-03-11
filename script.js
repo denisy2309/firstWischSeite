@@ -439,6 +439,12 @@ function goToStep(step) {
     } else if (step === 3) {
         displayServicesSummary();
 
+        // Submit-Button initial deaktivieren
+        const submitBtn = document.getElementById('submit-booking-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
+
         // Kalender rendern wenn Slots vorhanden sind
         if (Object.keys(availableSlots).length > 0) {
             // Datum-Dropdown erstellen falls nicht vorhanden
@@ -462,6 +468,12 @@ function goToStep(step) {
         const timeSlotsDiv = document.getElementById('time-slots');
         if (timeSlotsDiv) {
             timeSlotsDiv.innerHTML = '';
+        }
+    } else if (step === 4) {
+        // NEU: Button aktivieren wenn zu Schritt 4 gewechselt wird
+        const newBookingBtn = document.getElementById('new-booking-btn');
+        if (newBookingBtn) {
+            newBookingBtn.disabled = false;
         }
     }
 }
@@ -731,6 +743,7 @@ async function validateSelectedSlot() {
 }
 
 // Nicht mehr verfügbaren Slot aus der Anzeige entfernen
+// Nicht mehr verfügbaren Slot aus der Anzeige entfernen
 function removeUnavailableSlot(date, time) {
     if (availableSlots[date]) {
         // Zeit aus dem Array entfernen
@@ -739,15 +752,25 @@ function removeUnavailableSlot(date, time) {
         // Wenn keine Zeiten mehr übrig, Tag entfernen
         if (availableSlots[date].length === 0) {
             delete availableSlots[date];
-        }
-        
-        // Kalender neu rendern
-        renderDynamicCalendar();
-        
-        // Wenn das aktuelle Datum noch ausgewählt war, Zeitslots neu rendern
-        if (selectedDate === date) {
+            
+            // Kalender neu rendern
+            renderDynamicCalendar();
+            
+            // Datum-Auswahl zurücksetzen
+            selectedDate = '';
+            
+            // Zeitslots leeren
+            const timeSlotsDiv = document.getElementById('time-slots');
+            if (timeSlotsDiv) {
+                timeSlotsDiv.innerHTML = '';
+            }
+        } else {
+            // Tag hat noch andere Zeiten, nur Zeitslots neu rendern
             renderTimeSlots(date);
         }
+        
+        // Submit-Button deaktivieren
+        updateSubmitButton();
     }
 }
 
@@ -998,4 +1021,10 @@ function displayConfirmation() {
     html += `<strong>Geschätzte Dauer: ${formatDuration(roundedDuration)}</strong>`;
     html += `</div>`;
     confirmationDiv.innerHTML = html;
+
+    // NEU: "Neue Buchung erstellen" Button aktivieren
+    const newBookingBtn = document.getElementById('new-booking-btn');
+    if (newBookingBtn) {
+        newBookingBtn.disabled = false;
+    }
 }
