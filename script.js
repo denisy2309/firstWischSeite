@@ -696,6 +696,61 @@ async function fetchAvailableSlots() {
     }
 }
 
+// Einzelnen Slot validieren (Optimistic Locking)
+async function validateSelectedSlot() {
+    const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
+    const totalDuration = calculateTotalDurationForBackend();
+    
+    try {
+        const response = await fetch('https://uncastigated-niels-greatly.ngrok-free.dev/api/validate-slot', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contractor: contractorInfo.contractor,
+                date: selectedDate,
+                time: selectedTime,
+                requiredDuration: totalDuration
+            })
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok && result.success) {
+            return result.available;
+        } else {
+            console.error('Validierung fehlgeschlagen:', result);
+            return false;
+        }
+    } catch (error) {
+        console.error('Fehler bei der Slot-Validierung:', error);
+        // Bei Netzwerkfehler: lieber durchlassen als blockieren
+        return true;
+    }
+}
+
+// Nicht mehr verfügbaren Slot aus der Anzeige entfernen
+function removeUnavailableSlot(date, time) {
+    if (availableSlots[date]) {
+        // Zeit aus dem Array entfernen
+        availableSlots[date] = availableSlots[date].filter(t => t !== time);
+        
+        // Wenn keine Zeiten mehr übrig, Tag entfernen
+        if (availableSlots[date].length === 0) {
+            delete availableSlots[date];
+        }
+        
+        // Kalender neu rendern
+        renderDynamicCalendar();
+        
+        // Wenn das aktuelle Datum noch ausgewählt war, Zeitslots neu rendern
+        if (selectedDate === date) {
+            renderTimeSlots(date);
+        }
+    }
+}
+
 // Loading-State anzeigen
 function showLoadingState() {
     const step3 = document.getElementById('step-3');
@@ -817,6 +872,35 @@ async function submitBooking() {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Wird gesendet...';
 
+    // SCHRITT 1: Loading anzeigen
+    showGlobalLoading('Termin wird überprüft...');
+
+    // SCHRITT 2: Slot validieren (Optimistic Locking)
+    const isAvailable = await validateSelectedSlot();
+    
+    if (!isAvailable) {
+        hideGlobalLoading();
+        
+        // Slot ist nicht mehr verfügbar
+        alert('Dieser Termin wurde gerade von einem anderen Kunden gebucht. Bitte wählen Sie einen anderen Zeitpunkt.');
+        
+        // Ausgegraueten/entfernten Slot aus der Anzeige entfernen
+        removeUnavailableSlot(selectedDate, selectedTime);
+        
+        // Button zurücksetzen
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Buchung abschließen';
+        
+        // Auswahl zurücksetzen
+        selectedTime = '';
+        updateSubmitButton();
+        
+        return;
+    }
+
+    // SCHRITT 3: Slot ist verfügbar, fortfahren mit Buchung
+    showGlobalLoading('Buchung wird abgeschlossen...');
+
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
     const serviceDuration = calculateServiceDuration();
     const totalDurationForBackend = calculateTotalDurationForBackend();
@@ -824,7 +908,6 @@ async function submitBooking() {
     const servicesWithQuantity = Object.entries(selectedServices).map(([id, quantity]) => {
         let service = null;
         
-        // Service in allen Kategorien suchen
         serviceCategories.forEach(category => {
             if (category.services) {
                 const foundService = category.services.find(s => s.id === id);
@@ -865,16 +948,19 @@ async function submitBooking() {
         const result = await response.json();
 
         if (response.ok && result.success) {
+            hideGlobalLoading();
             displayConfirmation();
             goToStep(4);
             submitBtn.textContent = 'Buchung abschließen';
         } else {
+            hideGlobalLoading();
             alert('Fehler beim Senden der Buchung: ' + (result.message || 'Unbekannter Fehler'));
             submitBtn.disabled = false;
             submitBtn.textContent = 'Buchung abschließen';
         }
     } catch (error) {
         console.error('Fehler:', error);
+        hideGlobalLoading();
         alert('Verbindungsfehler. Bitte überprüfen Sie Ihre Internetverbindung.');
         submitBtn.disabled = false;
         submitBtn.textContent = 'Buchung abschließen';

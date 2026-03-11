@@ -53,6 +53,52 @@ app.post('/api/available-slots', async (req, res) => {
     }
 });
 
+// API-Endpunkt zum Validieren eines einzelnen Slots
+app.post('/api/validate-slot', async (req, res) => {
+    const { contractor, date, time, requiredDuration } = req.body;
+    
+    console.log('Slot-Validierung:', { contractor, date, time });
+
+    try {
+        // Request an n8n Webhook zur Validierung
+        const response = await fetch('http://localhost:5678/webhook/IHRE-VALIDIERUNGS-WEBHOOK-ID', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contractor,
+                date,
+                time,
+                requiredDuration
+            })
+        });
+
+        const responseData = await response.json();
+
+        if (response.ok) {
+            // Erwartete Response: { available: true/false }
+            res.status(200).json({
+                success: true,
+                available: responseData.available || false
+            });
+        } else {
+            res.status(response.status).json({
+                success: false,
+                message: 'Fehler bei der Slot-Validierung',
+                error: responseData
+            });
+        }
+    } catch (error) {
+        console.error('Fehler bei der Slot-Validierung:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Serverfehler bei der Slot-Validierung',
+            error: error.message
+        });
+    }
+});
+
 // API-Endpunkt für Buchungen
 app.post('/api/bookings', async (req, res) => {
     const bookingData = req.body;
