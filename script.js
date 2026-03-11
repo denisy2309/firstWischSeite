@@ -490,6 +490,7 @@ function goToStep(step) {
         displayCustomerInfo();
         renderServices();
     } else if (step === 3) {
+        console.log('Schritt 3 - selectedDate:', selectedDate, 'selectedTime:', selectedTime);
         if (!selectedDate || !selectedTime) {
             selectedDate = '';
             selectedTime = '';
@@ -498,6 +499,7 @@ function goToStep(step) {
 
         // Submit-Button initial deaktivieren
         const submitBtn = document.getElementById('submit-booking-btn');
+        console.log('Submit-Button:', submitBtn);
         if (submitBtn) {
             submitBtn.disabled = true;
         }
