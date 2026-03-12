@@ -175,6 +175,7 @@ function hideGlobalLoading() {
 }
 
 function showErrorMessage(title, message, buttonText = 'OK') {
+    console.log('showErrorMessage aufgerufen');
     // Prüfen ob Overlay bereits existiert
     let overlay = document.getElementById('error-message-overlay');
     
@@ -202,6 +203,14 @@ function showErrorMessage(title, message, buttonText = 'OK') {
     `;
     
     overlay.style.display = 'block';
+
+    // DEBUG
+    setTimeout(() => {
+        const dateSelect = document.getElementById('appointment-date');
+        const backBtn = document.getElementById('back-to-services-btn');
+        console.log('Nach showErrorMessage - Datum disabled?', dateSelect?.disabled);
+        console.log('Nach showErrorMessage - Zurück disabled?', backBtn?.disabled);
+    }, 100);
     
     // Button-Handler
     document.getElementById('error-message-btn').addEventListener('click', () => {
@@ -821,8 +830,8 @@ async function validateSelectedSlot() {
 }
 
 // Nicht mehr verfügbaren Slot aus der Anzeige entfernen
-// Nicht mehr verfügbaren Slot aus der Anzeige entfernen
 function removeUnavailableSlot(date, time) {
+    console.log('removeUnavailableSlot aufgerufen');
     if (availableSlots[date]) {
         // Zeit aus dem Array entfernen
         availableSlots[date] = availableSlots[date].filter(t => t !== time);
@@ -852,6 +861,25 @@ function removeUnavailableSlot(date, time) {
         if (submitBtn) {
             submitBtn.disabled = true;
         }
+
+        // MANUELL Datum-Select und Zurück-Button reaktivieren
+        setTimeout(() => {
+            const dateSelect = document.getElementById('appointment-date');
+            const backBtn = document.getElementById('back-to-services-btn');
+            
+            if (dateSelect) {
+                dateSelect.disabled = false;
+            }
+            if (backBtn) {
+                backBtn.disabled = false;
+            }
+        }, 200);
+
+        // DEBUG
+        const dateSelect = document.getElementById('appointment-date');
+        const backBtn = document.getElementById('back-to-services-btn');
+        console.log('Datum-Select disabled?', dateSelect?.disabled);
+        console.log('Zurück-Button disabled?', backBtn?.disabled);
     }
 }
 
