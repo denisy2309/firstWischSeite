@@ -123,7 +123,7 @@ h2 {
     font-size: 1rem;
 }
 
-/* NEU: Date Input Fix für Mobile */
+/* Date Input Fix für Mobile */
 input[type="date"] {
     -webkit-appearance: none;
     -moz-appearance: none;
@@ -131,11 +131,33 @@ input[type="date"] {
     width: 100%;
     max-width: 100%;
     padding: 0.5rem 1rem;
+    min-height: 42px;
     border: 1px solid #d1d5db;
     border-radius: 0.5rem;
     font-size: 16px;
     box-sizing: border-box;
     display: block;
+    background-color: white;
+    color: #1f2937;
+    line-height: 1.5;
+}
+
+input[type="date"]:focus {
+    outline: none;
+    border-color: #d1d5db;
+    box-shadow: none;
+}
+
+input[type="date"]::-webkit-datetime-edit-text,
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+    color: #1f2937;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
 }
 
 .form-group input:focus,
