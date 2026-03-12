@@ -503,6 +503,14 @@ function goToStep(step) {
     } else if (step === 2) {
         displayCustomerInfo();
         renderServices();
+
+        // "Kundendaten ändern" Button aktivieren
+        setTimeout(() => {
+            const changeBtn = document.getElementById('change-customer-btn');
+            if (changeBtn) {
+                changeBtn.disabled = false;
+            }
+        }, 0.00000001);
     } else if (step === 3) {
         console.log('Schritt 3 - selectedDate:', selectedDate, 'selectedTime:', selectedTime);
         if (!selectedDate || !selectedTime) {
