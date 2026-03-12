@@ -873,7 +873,7 @@ function removeUnavailableSlot(date, time) {
             if (backBtn) {
                 backBtn.disabled = false;
             }
-        }, 200);
+        }, 0.00000001);
 
         // DEBUG
         const dateSelect = document.getElementById('appointment-date');
