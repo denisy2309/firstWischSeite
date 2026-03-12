@@ -842,8 +842,11 @@ function removeUnavailableSlot(date, time) {
             renderTimeSlots(date);
         }
         
-        // Submit-Button deaktivieren
-        updateSubmitButton();
+        // NUR Submit-Button deaktivieren, keine anderen!
+        const submitBtn = document.getElementById('submit-booking-btn');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
     }
 }
 
