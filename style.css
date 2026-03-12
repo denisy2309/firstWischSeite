@@ -137,17 +137,27 @@ input[type="date"] {
     font-size: 16px;
     box-sizing: border-box;
     display: block;
-    background-color: white;
     color: #1f2937;
     line-height: 1.5;
 }
 
-input[type="date"]:focus {
-    outline: none;
-    border-color: #d1d5db;
-    box-shadow: none;
+/* Alle Focus-Ränder entfernen */
+input[type="date"]:focus,
+input[type="date"]:focus-visible {
+    outline: none !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
 }
 
+input[type="date"]::-moz-focus-inner {
+    border: 0;
+}
+
+input[type="date"]:-moz-focusring {
+    outline: none;
+}
+
+/* Datum-Wert schwarz */
 input[type="date"]::-webkit-datetime-edit-text,
 input[type="date"]::-webkit-datetime-edit-month-field,
 input[type="date"]::-webkit-datetime-edit-day-field,
@@ -155,6 +165,7 @@ input[type="date"]::-webkit-datetime-edit-year-field {
     color: #1f2937;
 }
 
+/* Kalender-Icon */
 input[type="date"]::-webkit-calendar-picker-indicator {
     cursor: pointer;
     opacity: 0.6;
