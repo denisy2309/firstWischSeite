@@ -339,6 +339,19 @@ h2 {
         align-items: flex-start;
         gap: 0.5rem;
     }
+
+    /* NEU: Geburtsdatum-Feld auf Mobile anpassen */
+    input[type="date"] {
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+    
+    /* Alle Inputs auf Mobile */
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        box-sizing: border-box;
+    }
 }
 
 /* Checkbox-Styling */
