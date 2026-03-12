@@ -141,22 +141,6 @@ input[type="date"] {
     line-height: 1.5;
 }
 
-/* Alle Focus-Ränder entfernen */
-input[type="date"]:focus,
-input[type="date"]:focus-visible {
-    outline: none !important;
-    border-color: #d1d5db !important;
-    box-shadow: none !important;
-}
-
-input[type="date"]::-moz-focus-inner {
-    border: 0;
-}
-
-input[type="date"]:-moz-focusring {
-    outline: none;
-}
-
 /* Datum-Wert schwarz */
 input[type="date"]::-webkit-datetime-edit-text,
 input[type="date"]::-webkit-datetime-edit-month-field,
