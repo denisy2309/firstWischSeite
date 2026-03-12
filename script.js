@@ -149,8 +149,13 @@ function showGlobalLoading(message = 'Lädt...') {
     
     // Alle Buttons und Inputs deaktivieren
     document.querySelectorAll('button, input, select').forEach(el => {
-        el.disabled = true;
-        el.dataset.wasDisabled = el.disabled;
+        // Nur deaktivieren wenn nicht bereits disabled
+        if (!el.disabled) {
+            el.dataset.wasDisabled = 'false';
+            el.disabled = true;
+        } else {
+            el.dataset.wasDisabled = 'true'; // War schon disabled
+        }
     });
 }
 
