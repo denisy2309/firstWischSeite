@@ -503,14 +503,6 @@ function goToStep(step) {
     } else if (step === 2) {
         displayCustomerInfo();
         renderServices();
-
-        // "Kundendaten ändern" Button aktivieren
-        setTimeout(() => {
-            const changeBtn = document.getElementById('change-customer-btn');
-            if (changeBtn) {
-                changeBtn.disabled = false;
-            }
-        }, 0.00000001);
     } else if (step === 3) {
         console.log('Schritt 3 - selectedDate:', selectedDate, 'selectedTime:', selectedTime);
         if (!selectedDate || !selectedTime) {
@@ -586,6 +578,12 @@ function displayCustomerInfo() {
         <strong>Preisberechnung:</strong><br>
         38€/Stunde + 7€ Anfahrtspauschale
     `;
+
+    // NEU: "Kundendaten ändern" Button aktivieren
+    const changeBtn = document.getElementById('change-customer-btn');
+    if (changeBtn) {
+        changeBtn.disabled = false;
+    }
 }
 
 function renderServices() {
