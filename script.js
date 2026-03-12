@@ -529,7 +529,7 @@ function goToStep(step) {
                 submitBtn.disabled = true;
                 console.log('Submit-Button deaktiviert');
             }
-        }, 0.0001);
+        }, 0.00000001);
     } else if (step === 4) {
         // NEU: Button aktivieren wenn zu Schritt 4 gewechselt wird
         const newBookingBtn = document.getElementById('new-booking-btn');
