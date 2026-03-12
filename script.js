@@ -160,8 +160,13 @@ function hideGlobalLoading() {
         overlay.style.display = 'none';
     }
     
-    // Alle Buttons und Inputs wieder aktivieren (außer die, die vorher disabled waren)
+    // Alle Buttons und Inputs wieder aktivieren (AUSSER submit-booking-btn)
     document.querySelectorAll('button, input, select').forEach(el => {
+        // Diese Buttons NICHT reaktivieren - haben eigene Logik
+        if (el.id === 'submit-booking-btn') {
+            return;
+        }
+        
         if (el.dataset.wasDisabled !== 'true') {
             el.disabled = false;
         }
