@@ -1,11 +1,13 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box !important;
 }
 
 input[type="date"] {
-    max-width: 100%;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0.5rem 1rem !important;
 }
 
 body {
