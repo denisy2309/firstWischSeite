@@ -421,7 +421,7 @@ function handleCustomerFormSubmit(e) {
     if (!contractorInfo) {
         showErrorMessage(
             'Postleitzahl nicht unterstützt',
-            'Entschuldigung, für Ihre Postleitzahl bieten wir derzeit nur Service in NRW und Niedersachsen an. Bitte überprüfen Sie Ihre Eingabe.',
+            'Es tut uns leid, wir bieten derzeit unseren Service nur in NRW und Niedersachsen an. Bitte überprüfen Sie Ihre Eingabe.',
             'OK'
         );
         return;
@@ -720,7 +720,7 @@ async function fetchAvailableSlots() {
         hideGlobalLoading();
         showErrorMessage(
             'Kein Service verfügbar',
-            'Entschuldigung, für Ihre Postleitzahl bieten wir derzeit keinen Service an.',
+            'Es tut uns leid, für Ihre Postleitzahl bieten wir derzeit keinen Service an.',
             'OK'
         );
         return;
