@@ -95,7 +95,15 @@ h2 {
 }
 
 .form-group {
+    width: 100%;
     margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+#customer-form {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
 }
 
 .form-group label {
@@ -115,11 +123,19 @@ h2 {
     font-size: 1rem;
 }
 
-/* NEU: Spezifischer Fix für Geburtsdatum */
-#birthdate {
+/* NEU: Date Input Fix für Mobile */
+input[type="date"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     width: 100%;
     max-width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    font-size: 16px;
     box-sizing: border-box;
+    display: block;
 }
 
 .form-group input:focus,
@@ -331,8 +347,23 @@ h2 {
 }
 
 @media (max-width: 640px) {
-    #birthdate {
-        font-size: 16px;
+    /* NEU: Date Input Mobile Fix */
+    input[type="date"] {
+        min-width: 0;
+        width: 100%;
+    }
+    
+    .form-group {
+        width: 100%;
+        overflow: hidden;
+    }
+    
+    .container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .step-content {
+        padding: 1rem;
     }
 
     .progress-step span:not(.icon) {
