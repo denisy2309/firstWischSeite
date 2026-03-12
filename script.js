@@ -968,7 +968,10 @@ function selectTimeSlot(time) {
 
 function updateSubmitButton() {
     const canSubmit = selectedDate && selectedTime;
-    document.getElementById('submit-booking-btn').disabled = !canSubmit;
+    const submitBtn = document.getElementById('submit-booking-btn');
+    if (submitBtn) {
+        submitBtn.disabled = !canSubmit;
+    }
 }
 
 async function submitBooking() {
