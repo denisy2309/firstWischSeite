@@ -505,6 +505,20 @@ function goToStep(step) {
     // Step-spezifische Aktionen
     if (step === 1) {
         fillCustomerForm();
+
+        // NEU: Alle Formular-Elemente aktivieren
+        setTimeout(() => {
+            // Alle Inputs im Formular aktivieren
+            document.querySelectorAll('#customer-form input, #customer-form select').forEach(el => {
+                el.disabled = false;
+            });
+            
+            // Submit-Button aktivieren
+            const submitBtn = document.querySelector('#customer-form button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+            }
+        }, 0.00000001);
     } else if (step === 2) {
         displayCustomerInfo();
         renderServices();
