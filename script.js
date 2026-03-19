@@ -492,6 +492,14 @@ function goToStep(step) {
         }
     }
 
+    // NEU: Timing Info-Box entfernen wenn nicht in Schritt 3
+    if (step !== 3) {
+        const infoBox = document.getElementById('timing-info-box');
+        if (infoBox) {
+            infoBox.remove();
+        }
+    }
+
     // Aktuellen Step anzeigen
     document.getElementById(`step-${step}`).style.display = 'block';
     if (step <= 3) {
@@ -554,6 +562,9 @@ function goToStep(step) {
         if (timeSlotsDiv) {
             timeSlotsDiv.innerHTML = '';
         }
+
+        // NEU: Info-Box am Ende hinzufügen
+        addTimingInfoBox();
 
         // Submit-Button EXPLIZIT deaktivieren
         setTimeout(() => {
@@ -710,6 +721,31 @@ function displayServicesSummary() {
     html += `<strong>Geschätzte Gesamtdauer: ${formatDuration(roundedDuration)}</strong>`;
     html += `</div>`;
     summaryDiv.innerHTML = html;
+}
+
+// Info-Box für Terminauswahl hinzufügen
+function addTimingInfoBox() {
+    // Prüfen ob Info-Box bereits existiert
+    let infoBox = document.getElementById('timing-info-box');
+    
+    if (!infoBox) {
+        // Container für Step 3 finden
+        const step3Container = document.getElementById('step-3');
+        const buttonRow = step3Container.querySelector('.button-row');
+        
+        if (buttonRow) {
+            // Info-Box erstellen
+            infoBox = document.createElement('div');
+            infoBox.id = 'timing-info-box';
+            infoBox.className = 'timing-info-box';
+            infoBox.innerHTML = `
+                <p><strong>ℹ️ Hinweis:</strong> Die angezeigten Uhrzeiten und die geschätzte Dauer können variieren und dienen lediglich als Richtlinie.</p>
+            `;
+            
+            // Vor den Buttons einfügen
+            buttonRow.parentNode.insertBefore(infoBox, buttonRow);
+        }
+    }
 }
 
 // Verfügbare Slots vom Backend abrufen
