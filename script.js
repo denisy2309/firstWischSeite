@@ -1141,7 +1141,6 @@ async function submitBooking() {
 
 
 function displayConfirmation() {
-    const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
     const totalDuration = calculateTotalDurationForFrontend();
     const roundedDuration = roundUpDuration(totalDuration);
     
@@ -1149,7 +1148,6 @@ function displayConfirmation() {
     let html = `
         <strong>Termin:</strong> ${formatDate(selectedDate)} um ${selectedTime} Uhr<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
-        <strong>Zuständig:</strong> ${contractorInfo.contractor}<br>
         <strong>Leistungen:</strong><br>
         <ul class="booking-summary">
     `;
