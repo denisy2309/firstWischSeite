@@ -70,6 +70,14 @@
                     </div>
 
                     <div class="form-group">
+                        <label for="email">E-Mail-Adresse</label>
+                        <input type="email" id="email" name="email" placeholder="beispiel@email.de" required 
+                               pattern="[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,}$"
+                               title="Bitte geben Sie eine gültige E-Mail-Adresse ein">
+                        <span id="email-suggestion" style="display: none; color: #dc2626; font-size: 0.875rem; margin-top: 0.25rem;"></span>
+                    </div>
+
+                    <div class="form-group">
                         <label for="birthdate">Geburtsdatum</label>
                         <input type="date" id="birthdate" name="birthdate" required>
                     </div>

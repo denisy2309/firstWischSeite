@@ -111,8 +111,6 @@ app.post('/api/bookings', async (req, res) => {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                // Fügen Sie hier ggf. weitere Header hinzu (z.B. API-Keys)
-                // 'Authorization': 'Bearer YOUR_API_KEY'
             },
             body: JSON.stringify(bookingData)
         });
@@ -121,8 +119,15 @@ app.post('/api/bookings', async (req, res) => {
 
         if (response.ok) {
             res.status(200).json({
-                success: true,
+                success: response.success,
                 message: 'Buchung erfolgreich übermittelt',
+                data: responseData
+            });
+        } else if (response.emailError){
+            res.status(200).json({
+                success: response.success,
+                emailError: response.emailError,
+                message: response.message,
                 data: responseData
             });
         } else {

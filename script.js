@@ -120,6 +120,39 @@ function getGermanTimestamp() {
     return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
 }
 
+// Häufige Email-Tippfehler prüfen
+function checkEmailTypos(email) {
+    const commonTypos = {
+        'gmial.com': 'gmail.com',
+        'gmai.com': 'gmail.com',
+        'gmil.com': 'gmail.com',
+        'gmaill.com': 'gmail.com',
+        'gmail.co': 'gmail.com',
+        'hotmial.com': 'hotmail.com',
+        'hotmai.com': 'hotmail.com',
+        'hotmail.co': 'hotmail.com',
+        'outlok.com': 'outlook.com',
+        'outloo.com': 'outlook.com',
+        'outlook.co': 'outlook.com',
+        'yahooo.com': 'yahoo.com',
+        'yaho.com': 'yahoo.com',
+        'yahoo.co': 'yahoo.com',
+        'web.d': 'web.de',
+        'web.dee': 'web.de',
+        'gmx.d': 'gmx.de',
+        'gmx.dee': 'gmx.de'
+    };
+    
+    const parts = email.split('@');
+    if (parts.length === 2) {
+        const domain = parts[1].toLowerCase();
+        if (commonTypos[domain]) {
+            return parts[0] + '@' + commonTypos[domain];
+        }
+    }
+    return null;
+}
+
 // Globales Loading-Overlay
 function showGlobalLoading(message = 'Lädt...') {
     // Prüfen ob Overlay bereits existiert
@@ -220,6 +253,42 @@ function showErrorMessage(title, message, buttonText = 'OK') {
     // Button-Handler
     document.getElementById('error-message-btn').addEventListener('click', () => {
         hideErrorMessage();
+    });
+}
+
+function showErrorMessageWithCallback(title, message, buttonText, callback) {
+    let overlay = document.getElementById('error-message-overlay');
+    
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'error-message-overlay';
+        document.body.appendChild(overlay);
+    }
+    
+    overlay.innerHTML = `
+        <div style="background: rgba(0, 0, 0, 0.7); position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+            <div style="background: white; padding: 2rem 2.5rem; border-radius: 1rem; text-align: center; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-width: 500px; margin: 1rem;">
+                <div style="width: 60px; height: 60px; background-color: #fee2e2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem;">
+                    <span style="font-size: 2rem; color: #dc2626;">⚠️</span>
+                </div>
+                <h3 style="margin: 0 0 1rem 0; font-size: 1.5rem; font-weight: 600; color: #1f2937;">${title}</h3>
+                <p style="margin: 0 0 1.5rem 0; font-size: 1rem; color: #6b7280; line-height: 1.5;">${message}</p>
+                <button id="error-message-btn" style="background-color: #2563eb; color: white; border: none; padding: 0.75rem 2rem; border-radius: 0.5rem; font-size: 1rem; font-weight: 500; cursor: pointer; transition: background-color 0.2s;" 
+                    onmouseover="this.style.backgroundColor='#1d4ed8'" 
+                    onmouseout="this.style.backgroundColor='#2563eb'">
+                    ${buttonText}
+                </button>
+            </div>
+        </div>
+    `;
+    
+    overlay.style.display = 'block';
+    
+    document.getElementById('error-message-btn').addEventListener('click', () => {
+        hideErrorMessage();
+        if (callback) {
+            callback();
+        }
     });
 }
 
@@ -340,6 +409,29 @@ document.addEventListener('DOMContentLoaded', function() {
         goToStep(2);
     }
 
+    // NEU: Email-Tippfehler-Prüfung
+    const emailInput = document.getElementById('email');
+    if (emailInput) {
+        emailInput.addEventListener('blur', function() {
+            const email = this.value;
+            const suggestionSpan = document.getElementById('email-suggestion');
+            
+            if (email) {
+                const suggestion = checkEmailTypos(email);
+                if (suggestion) {
+                    suggestionSpan.textContent = `Meinten Sie vielleicht: ${suggestion}?`;
+                    suggestionSpan.style.display = 'block';
+                } else {
+                    suggestionSpan.style.display = 'none';
+                }
+            }
+        });
+        
+        emailInput.addEventListener('focus', function() {
+            document.getElementById('email-suggestion').style.display = 'none';
+        });
+    }
+
     // Event Listeners
     document.getElementById('customer-form').addEventListener('submit', handleCustomerFormSubmit);
     document.getElementById('change-customer-btn').addEventListener('click', () => goToStep(1));
@@ -403,6 +495,18 @@ function handleCustomerFormSubmit(e) {
         return;
     }
 
+    // Email-Tippfehler final prüfen
+    const email = formData.get('email');
+    const suggestion = checkEmailTypos(email);
+    if (suggestion) {
+        showErrorMessage(
+            'E-Mail-Adresse überprüfen',
+            `Meinten Sie vielleicht: ${suggestion}?`,
+            'OK'
+        );
+        return;
+    }
+
     const data = {
         fullName: formData.get('fullName'),
         street: formData.get('street'),
@@ -410,6 +514,7 @@ function handleCustomerFormSubmit(e) {
         postalCode: formData.get('postalCode'),
         city: formData.get('city'),
         phone: formData.get('phone'),
+        email: email,
         birthdate: formData.get('birthdate'),
         healthInsurance: formData.get('healthInsurance'),
         insuranceNumber: formData.get('insuranceNumber'),
@@ -473,6 +578,7 @@ function fillCustomerForm() {
         document.getElementById('postalCode').value = customerData.postalCode || '';
         document.getElementById('city').value = customerData.city || '';
         document.getElementById('phone').value = customerData.phone || '';
+        document.getElementById('email').value = customerData.email || '';
         document.getElementById('birthdate').value = customerData.birthdate || '';
         document.getElementById('healthInsurance').value = customerData.healthInsurance || '';
         document.getElementById('insuranceNumber').value = customerData.insuranceNumber || '';
@@ -591,6 +697,7 @@ function displayCustomerInfo() {
         <strong>Kunde:</strong> ${customerData.fullName}<br>
         <strong>Geburtsdatum:</strong> ${birthdate}<br>
         <strong>Adresse:</strong> ${customerData.street} ${customerData.houseNumber}, ${customerData.postalCode} ${customerData.city}<br>
+        <strong>E-Mail:</strong> ${customerData.email}<br>
         <strong>Telefon:</strong> ${customerData.phone}
     `;
     
@@ -1102,7 +1209,6 @@ async function submitBooking() {
     showGlobalLoading('Buchung wird abgeschlossen...');
 
     const contractorInfo = getContractorFromPostalCode(customerData.postalCode);
-    const serviceDuration = calculateServiceDuration();
     const totalDurationForBackend = calculateTotalDurationForBackend();
 
     const servicesWithQuantity = Object.entries(selectedServices).map(([id, quantity]) => {
@@ -1151,6 +1257,18 @@ async function submitBooking() {
             hideGlobalLoading();
             displayConfirmation();
             goToStep(4);
+            submitBtn.textContent = 'Buchung abschließen';
+        } else if (result.emailError) {
+            // Email-Fehler - zurück zu Kundendaten
+            showErrorMessageWithCallback(
+                'E-Mail-Adresse ungültig',
+                'Die eingegebene E-Mail-Adresse konnte nicht erreicht werden. Bitte überprüfen Sie Ihre E-Mail-Adresse.',
+                'Daten korrigieren',
+                () => {
+                    goToStep(1);
+                }
+            );
+            submitBtn.disabled = false;
             submitBtn.textContent = 'Buchung abschließen';
         } else {
             hideGlobalLoading();
