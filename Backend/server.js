@@ -138,7 +138,7 @@ app.post('/api/bookings', async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('Fehler beim Weiterleiten der Buchung:', error);
+        console.error('Fehler beim Weiterleiten der Buchung:', error, responseData);
         res.status(500).json({
             success: false,
             message: 'Serverfehler beim Übermitteln der Buchung',
