@@ -119,15 +119,15 @@ app.post('/api/bookings', async (req, res) => {
 
         if (response.ok) {
             res.status(200).json({
-                success: response.output.success,
+                success: responseData.output.success,
                 message: 'Buchung erfolgreich übermittelt',
                 data: responseData
             });
-        } else if (response.output.emailError){
+        } else if (responseData.output.emailError){
             res.status(200).json({
-                success: response.output.success,
-                emailError: response.output.emailError,
-                message: response.output.message,
+                success: responseData.output.success,
+                emailError: responseData.output.emailError,
+                message: responseData.output.message,
                 data: responseData
             });
         } else {
@@ -138,7 +138,7 @@ app.post('/api/bookings', async (req, res) => {
             });
         }
     } catch (error) {
-        console.error('Fehler beim Weiterleiten der Buchung:', error, responseData);
+        console.error('Fehler beim Weiterleiten der Buchung:', error);
         res.status(500).json({
             success: false,
             message: 'Serverfehler beim Übermitteln der Buchung',
