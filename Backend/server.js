@@ -119,15 +119,15 @@ app.post('/api/bookings', async (req, res) => {
 
         if (response.ok) {
             res.status(200).json({
-                success: response.success,
+                success: response.output.success,
                 message: 'Buchung erfolgreich übermittelt',
                 data: responseData
             });
-        } else if (response.emailError){
+        } else if (response.output.emailError){
             res.status(200).json({
-                success: response.success,
-                emailError: response.emailError,
-                message: response.message,
+                success: response.output.success,
+                emailError: response.output.emailError,
+                message: response.output.message,
                 data: responseData
             });
         } else {
