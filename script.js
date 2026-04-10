@@ -390,6 +390,27 @@ function toggleCategory(categoryId) {
     }
 }
 
+// Kundendaten im Hintergrund an Backend senden (Fire & Forget)
+async function sendCustomerDataToBackend(data) {
+    try {
+        // Kein await - Fire & Forget
+        fetch('https://uncastigated-niels-greatly.ngrok-free.dev/api/customer-data', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                customer: data,
+                timestamp: getGermanTimestamp()
+            })
+        }).catch(err => {
+            console.log('Kundendaten-Senden fehlgeschlagen (wird ignoriert):', err);
+        });
+    } catch (error) {
+        console.log('Fehler beim Senden der Kundendaten (wird ignoriert):', error);
+    }
+}
+
 
 // Initialisierung
 document.addEventListener('DOMContentLoaded', function() {
@@ -534,6 +555,10 @@ function handleCustomerFormSubmit(e) {
 
     saveCustomerData(data);
     customerData = data;
+
+    // NEU: Kundendaten im Hintergrund an Backend senden (Fire & Forget)
+    sendCustomerDataToBackend(data);
+
     goToStep(2);
 }
 

@@ -99,6 +99,34 @@ app.post('/api/validate-slot', async (req, res) => {
     }
 });
 
+// API-Endpunkt zum Speichern von Kundendaten (Fire & Forget)
+app.post('/api/customer-data', async (req, res) => {
+    const customerData = req.body;
+    
+    console.log('Kundendaten erhalten:', customerData);
+
+    // SOFORT Response senden (nicht warten)
+    res.status(200).json({
+        success: true,
+        message: 'Daten werden verarbeitet'
+    });
+
+    // Im Hintergrund an n8n senden (Fire & Forget)
+    try {
+        await fetch('http://localhost:5678/webhook-test/18f6465f-ee88-48f7-b524-7c24ff58418c', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(customerData)
+        });
+        console.log('Kundendaten an n8n gesendet');
+    } catch (error) {
+        console.error('Fehler beim Senden an n8n:', error);
+        // Fehler wird geloggt, aber nicht an Frontend weitergegeben
+    }
+});
+
 // API-Endpunkt für Buchungen
 app.post('/api/bookings', async (req, res) => {
     const bookingData = req.body;
