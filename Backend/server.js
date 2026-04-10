@@ -113,7 +113,7 @@ app.post('/api/customer-data', async (req, res) => {
 
     // Im Hintergrund an n8n senden (Fire & Forget)
     try {
-        await fetch('http://localhost:5678/webhook-test/18f6465f-ee88-48f7-b524-7c24ff58418c', {
+        await fetch('http://localhost:5678/webhook/18f6465f-ee88-48f7-b524-7c24ff58418c', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
