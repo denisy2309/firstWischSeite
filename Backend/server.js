@@ -6,14 +6,14 @@ const PORT = 3000;
 
 const CONFIG = {
     // Lokale Supabase Konfiguration
-    supabaseUrl: 'http://localhost:54321',  // Deine lokale Supabase URL
-    supabaseServiceKey: 'DEIN_SERVICE_ROLE_KEY', // Service Role Key (aus .env oder Docker logs)
+    supabaseUrl: 'http://localhost:8000',  // Deine lokale Supabase URL
+    supabaseServiceKey: process.env.SUPABASE_KEY, // Service Role Key (aus .env oder Docker logs)
     
     // Master Code
     masterCode: '123',
     
     // n8n Webhook
-    n8nWebhookUrl: 'DEINE_N8N_WEBHOOK_URL',
+    n8nWebhookUrl: 'http://localhost:5678/webhook/a35fcedb-3f86-441c-bfee-3f8f67b8353b',
     
     // Server Port
     port: 3000
