@@ -7,7 +7,7 @@ const PORT = 3000;
 const CONFIG = {
     // Lokale Supabase Konfiguration
     supabaseUrl: 'http://localhost:8000',  // Deine lokale Supabase URL
-    supabaseServiceKey: process.env.SUPABASE_KEY, // Service Role Key (aus .env oder Docker logs)
+    supabaseServiceKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYW5vbiIsImlzcyI6InN1cGFiYXNlIiwiaWF0IjoxNzUxODM5MjAwLCJleHAiOjE5MDk2MDU2MDB9.bLapBKEpVDeXBlSNRiwThrnxglJjS4qHQK8W-RqB0_Y', // Service Role Key (aus .env oder Docker logs)
     
     // Master Code
     masterCode: '123',
